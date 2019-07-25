@@ -6,8 +6,6 @@ DATA_PATH = '../../Data';
 
 caesar = load_raw_data(DATA_PATH);
 
-
-
 %% reformat family income
 for i=1:length(caesar.Properties.VariableNames)
     caesar.Properties.VariableNames(i) = strrep(caesar.Properties.VariableNames(i), '_mm_', '');
