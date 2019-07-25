@@ -9,63 +9,20 @@ getd('src');
 clear getd
 
 prep_data();
-%caesar([9,29],:)= caesar([29,9],:); % changing reference group for BirthState to Midwest
-%caesar([1,22],:)= caesar([22,1],:); % changing reference group for BirthState to South
+
 caesar.BirthState = reordercats(categorical(caesar.BirthState),{'Midwest', 'Foreign',  'Northeast', 'South', 'West'}); % changing reference group for BirthState to Midwest
 caesar.CarMake = reordercats(categorical(caesar.CarMake),{'Economy', 'Luxury'}); % changing reference group for car make to Economy
 caesar.CarModel = reordercats(categorical(caesar.CarModel),{'Non-sedan', 'Sedan',});
-%caesar.CarModel = reordercats(categorical(caesar.CarModel),{'Intermediate', 'Compact/Economy', 'Full Size', 'SUV/Minivan', 'Truck/Van'}); % changing reference group for car model to Intermediate
-%caesar.MaritalStatus = reordercats(categorical(caesar.MaritalStatus),{'Married', 'NeverMarried'}); % changing reference group for marital satatus to married
-% caesar.MaritalStatus = categorical(caesar.MaritalStatus);
-% caesar.Race = categorical(caesar.Race);
-% caesar.Occupation = categorical(caesar.Occupation);
+
 summary(caesar)
 
-% Uncomment to export table
-% writetable(caesar, 'caesar.csv');
 
-
-%% Examples
-% % adding new variables
-% BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-% AgeSquared = caesar.Age.^2;
-% tbl = [caesar, array2table([BMI, AgeSquared], 'VariableNames', {'BMI', 'AgeSquared'})];
-% 
-% % creating a subset that satisfies criteria (ex: selecting males, white collar, and age>40 only)
-% rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar') & tbl.Age>40;
-% tbl = tbl(rows,:);
-% 
-% % selecting variables for analysis
-% vars = {'FamilyIncome', 'Age', 'Occupation', 'Education', 'NumberOfChildren',...
-%     'Fitness', 'MaritalStatus', 'Stature', 'BMI', 'Var1', 'Var2', 'Var3'};
-% tbl = tbl(:, vars);
-% 
-% % remove variables from analysis
-% tbl = removevars(tbl, {'NumberOfChildren'});
-% 
-% % find rows with missing data
-% TF = ismissing(tbl);
-% tbl(any(TF,2),:);
-% 
-% % remove rows with missing data
-% tbl = rmmissing(tbl);
-% 
-% % transform a variable to something else
-% tbl.FamilyIncome = log(tbl.FamilyIncome);
-% 
-% % fit a model
-% mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
-% 
-% % print the model as a LaTeX table
-% % TODO
-
-%% Summary statistics (male only)
+%% Summary statistics (male only) - Table 1
 % adding new variables
 BMI = caesar.Weight./(caesar.Stature*0.001).^2;
 ReportedBMI = caesar.ReportedWeight./(caesar.ReportedHeight*0.001).^2;
 AgeSquared = caesar.Age.^2;
 Exp = max(caesar.Age - caesar.Education - 6,0);
-%Exp = caesar.Age - caesar.Education - 6;
 ExpSquared = Exp.^2;
 CarAge = 2001-caesar.CarYear;
 WeightError = caesar.ReportedWeight - caesar.Weight;
@@ -76,15 +33,10 @@ HeightError = caesar.ReportedHeight - caesar.Stature;
 tbl = [caesar, array2table([BMI, ReportedBMI, WeightError, BMIError, HeightError, AgeSquared,  Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'ReportedBMI', 'WeightError', 'BMIError', 'HeightError', 'AgeSquared', 'Experience', 'ExperienceSquared', 'CarAge'})];
 
 % creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
  rows = strcmp(tbl.Gender, 'Male');
  tbl = tbl(rows,:);
  
 %selecting variables for analysis
-%  vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%      'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'CarMake','CarModel', 'CarAge', 'ShoeSize',...
-%      'JacketSize', 'PantsSizeWaist', 'PantsSizeInseam',  'BMI', 'Weight'};
- 
    vars = {'FamilyIncome', 'ReportedHeight', 'ReportedWeight',  'Stature', 'Weight', 'BMI', 'ReportedBMI', 'WeightError', 'BMIError', 'HeightError' ...
            'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
            'Fitness', 'MaritalStatus', 'Race', 'BirthState',  'Var1', 'Var2' };
@@ -97,14 +49,6 @@ tbl = [caesar, array2table([BMI, ReportedBMI, WeightError, BMIError, HeightError
  
 % remove rows with missing data
  tbl = rmmissing(tbl);
- 
-% take log on family income
- %tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
-% mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
-
- %figure; scatter(tbl.Weight, tbl.WeightError); lsline;
 
 summary(tbl)
 
@@ -128,12 +72,11 @@ subplot(2,3,6); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInte
 x = tbl.Var2; y = tbl.BMI; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
 subplot(2,3,4); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_2$ vs. BMI ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_2$','Interpreter','latex'); ylabel('BMI','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
 
-%% Summary statistics (Female only)
+%% Summary statistics (Female only) - Table 2
 % adding new variables
 BMI = caesar.Weight./(caesar.Stature*0.001).^2;
 ReportedBMI = caesar.ReportedWeight./(caesar.ReportedHeight*0.001).^2;
 AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
 Exp = max(caesar.Age - caesar.Education - 6,0);
 ExpSquared = Exp.^2;
 CarAge = 2001-caesar.CarYear;
@@ -144,15 +87,9 @@ HeightError = caesar.ReportedHeight - caesar.Stature;
 tbl = [caesar, array2table([BMI, ReportedBMI, WeightError, BMIError, HeightError, AgeSquared,  Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'ReportedBMI', 'WeightError', 'BMIError', 'HeightError', 'AgeSquared', 'Experience', 'ExperienceSquared', 'CarAge'})];
 
 % creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
  rows = strcmp(tbl.Gender, 'Female');
  tbl = tbl(rows,:);
- 
-%selecting variables for analysis
-%  vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%      'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'CarMake','CarModel', 'CarAge', 'ShoeSize',...
-%      'JacketSize', 'PantsSizeWaist', 'PantsSizeInseam',  'BMI', 'Weight'};
- 
+
    vars = {'FamilyIncome', 'ReportedHeight', 'ReportedWeight',  'Stature', 'Weight', 'BMI', 'ReportedBMI', 'WeightError', 'BMIError', 'HeightError' ...
            'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
            'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'Var1', 'Var2', 'Var3', 'HipCircumference_Maximum', 'WaistCircumference_Pref', 'CupSize', 'BraSize' };
@@ -165,19 +102,8 @@ tbl = [caesar, array2table([BMI, ReportedBMI, WeightError, BMIError, HeightError
  
 % remove rows with missing data
  tbl = rmmissing(tbl);
- 
-% take log on family income
- %tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
-% mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
-
- %figure; scatter(tbl.Weight, tbl.WeightError); lsline;
 
 summary(tbl)
-
-% x = tbl.BMI; y = tbl.WaistCircumference_Pref./tbl.HipCircumference_Maximum; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-% figure; scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_1$ vs. Height ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_1$','Interpreter','latex'); ylabel('Height (mm)','Interpreter','latex'); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
 
 close all
 figure('pos',[10 10 900 500]);
@@ -199,77 +125,13 @@ subplot(2,3,6); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInte
 x = tbl.Var2; y = tbl.BMI; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
 subplot(2,3,4); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_2$ vs. BMI ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_2$','Interpreter','latex'); ylabel('BMI','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
 
-%% P3 vs Various body measures
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-Hip2Waist = caesar.HipCircumference_Maximum./caesar.WaistCircumference_Pref.*100;
-tbl = [caesar, array2table([Hip2Waist], 'VariableNames', {'Hip2Waist'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
-gender = 'Female';
- %rows = strcmp(tbl.Gender, gender) & tbl.Age >30 & tbl.Age < 60;
- rows = strcmp(tbl.Gender, gender);
- tbl = tbl(rows,:);
- 
-% selecting variables for analysis
-vars = {'BraSize', 'CupSize', 'Var3'};
-vars = cat(2, vars, caesar.Properties.VariableNames(setdiff(26:70,[28,29,61,62,63])));
-
-tbl = tbl(:, vars);
-
-% find rows with missing data
-TF = ismissing(tbl);
-tbl(any(TF,2),:);
- 
-% remove rows with missing data
-tbl = rmmissing(tbl);
- 
-% fit a model
-mdl = fitlm(tbl, 'ResponseVar', 'Var3') 
-
-coeff_estimate = mdl.Coefficients.Estimate';
-
-% Bootstrap
-N = size(tbl.Var3,1);
-
-MAX_ITER = 1000;
-
-bootstrap_coeff = [];
-for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
-    idx = randi(height(tbl), N,1);
-
-    bootstrap_tbl = tbl(idx,:);
-    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'Var3');
-    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
-        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
-    end
-end
-
-bootstrap_estimate = mean(bootstrap_coeff');
-bootstrap_SE = std(bootstrap_coeff');
-t_stat = coeff_estimate./bootstrap_SE;
-fprintf('Bootstrap\n');
-fprintf('============================================\n');
-fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
-for i=1:length(bootstrap_estimate)
-    str = mdl.CoefficientNames{i};
-    if length(str) > 20
-        str = [str(1:5), '...', str(end-10:end)];
-    end
-    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
-end
-
-
-%% Nayadara-Watson kernel-regression (height, male only)
+%% Nayadara-Watson kernel-regression (height, male only) - Figure 4
 tbl = caesar;
 
 % creating a subset that satisfies criteria (ex: selecting males, white collar)
 rows = strcmp(tbl.Gender, 'Male');
 tbl = tbl(rows,:);
  
-% vars = {'ReportedHeight', 'ReportedWeight', 'Stature',  'Weight'};
 vars = {'ReportedHeight', 'Stature'};
 tbl = tbl(:, vars);
  
@@ -325,14 +187,13 @@ set(gca,'TickLabelInterpreter','latex');
 axis([range(1), range(end), -20, 70])
 
 
-%% Nayadara-Watson kernel-regression (height, female only)
+%% Nayadara-Watson kernel-regression (height, female only) - Figure 4
 tbl = caesar;
 
 % creating a subset that satisfies criteria (ex: selecting males, white collar)
 rows = strcmp(tbl.Gender, 'Female');
 tbl = tbl(rows,:);
  
-% vars = {'ReportedHeight', 'ReportedWeight', 'Stature',  'Weight'};
 vars = {'ReportedHeight', 'Stature'};
 tbl = tbl(:, vars);
  
@@ -388,14 +249,13 @@ set(gca,'TickLabelInterpreter','latex');
 axis([range(1), range(end), -20, 70])
 
 
-%% Nayadara-Watson kernel-regression (weight, male only)
+%% Nayadara-Watson kernel-regression (weight, male only) - Figure 5
 tbl = caesar;
 
 % creating a subset that satisfies criteria (ex: selecting males, white collar)
 rows = strcmp(tbl.Gender, 'Male');
 tbl = tbl(rows,:);
  
-% vars = {'ReportedHeight', 'ReportedWeight', 'Stature',  'Weight'};
 vars = {'ReportedWeight', 'Weight'};
 tbl = tbl(:, vars);
  
@@ -450,14 +310,13 @@ set(lg, 'interpreter', 'latex')
 set(gca,'TickLabelInterpreter','latex');
 axis([range(1), range(end), -5.5, 5])
 
-%% Nayadara-Watson kernel-regression (weight, female only)
+%% Nayadara-Watson kernel-regression (weight, female only) - Figure 5
 tbl = caesar;
 
 % creating a subset that satisfies criteria (ex: selecting males, white collar)
 rows = strcmp(tbl.Gender, 'Female');
 tbl = tbl(rows,:);
  
-% vars = {'ReportedHeight', 'ReportedWeight', 'Stature',  'Weight'};
 vars = {'ReportedWeight', 'Weight'};
 tbl = tbl(:, vars);
  
@@ -514,14 +373,13 @@ axis([range(1), range(end), -5.5, 5])
 
 
 
-%% Quantile Regression Height (male only)
+%% Quantile Regression Height (male only) - Figure 6
 tbl = caesar;
 
 % creating a subset that satisfies criteria (ex: selecting males, white collar)
 rows = strcmp(tbl.Gender, 'Male');
 tbl = tbl(rows,:);
  
-% vars = {'ReportedHeight', 'Stature'};
 vars = {'ReportedHeight', 'Stature'};
 tbl = tbl(:, vars);
  
@@ -532,20 +390,10 @@ tbl(any(TF,2),:);
 % remove rows with missing data
 tbl = rmmissing(tbl);
  
-% x = tbl.Stature;
-% y = tbl.ReportedHeight;
 x = tbl.Stature;
 y = tbl.ReportedHeight-tbl.Stature;
 [x, I] = sort(x);
 y = y(I);
- 
-% mdl = TreeBagger(250, x, y, 'Method', 'regression');
-% tau = [0.1 0.25, 0.5, 0.75, 0.9];
-% quantiles = quantilePredict(mdl, x, 'Quantile', tau);
-% figure;
-% plot(x,x,'-k', x,quantiles(:,1), x,quantiles(:,2), x,quantiles(:,3), x,quantiles(:,4), x,quantiles(:,5))
-% legend('45 deg line', 'lower decile', 'lower quartile', 'median', 'upper quartile', 'upper decile')
-
 
 order = 1; 
 [p,stats] = quantreg(x, y, 0.1, order);
@@ -617,14 +465,13 @@ title('Reporting Error in Height (Male)', 'interpreter', 'latex')
 box on
 
 
-%% Quantile Regression Height (female only)
+%% Quantile Regression Height (female only) - Figure 6
 tbl = caesar;
 
 % creating a subset that satisfies criteria (ex: selecting males, white collar)
 rows = strcmp(tbl.Gender, 'Female');
 tbl = tbl(rows,:);
  
-% vars = {'ReportedHeight', 'Stature'};
 vars = {'ReportedHeight', 'Stature'};
 tbl = tbl(:, vars);
  
@@ -635,20 +482,10 @@ tbl(any(TF,2),:);
 % remove rows with missing data
 tbl = rmmissing(tbl);
  
-% x = tbl.Stature;
-% y = tbl.ReportedHeight;
 x = tbl.Stature;
 y = tbl.ReportedHeight - tbl.Stature;
 [x, I] = sort(x);
 y = y(I);
- 
-% mdl = TreeBagger(250, x, y, 'Method', 'regression');
-% tau = [0.1 0.25, 0.5, 0.75, 0.9];
-% quantiles = quantilePredict(mdl, x, 'Quantile', tau);
-% figure;
-% plot(x,x,'-k', x,quantiles(:,1), x,quantiles(:,2), x,quantiles(:,3), x,quantiles(:,4), x,quantiles(:,5))
-% legend('45 deg line', 'lower decile', 'lower quartile', 'median', 'upper quartile', 'upper decile')
-
 
 order = 1;
 [p,stats] = quantreg(x, y, 0.1, order);
@@ -718,14 +555,13 @@ title('Reporting Error in Height (Female)', 'interpreter', 'latex')
 box on
 
 
-%% Quantile Regression Weight (male only)
+%% Quantile Regression Weight (male only) - Figure 7
 tbl = caesar;
 
 % creating a subset that satisfies criteria (ex: selecting males, white collar)
 rows = strcmp(tbl.Gender, 'Male');
 tbl = tbl(rows,:);
  
-% vars = {'ReportedHeight', 'Stature'};
 vars = {'ReportedWeight', 'Weight'};
 tbl = tbl(:, vars);
  
@@ -736,20 +572,10 @@ tbl(any(TF,2),:);
 % remove rows with missing data
 tbl = rmmissing(tbl);
  
-% x = tbl.Stature;
-% y = tbl.ReportedHeight;
 x = tbl.Weight;
 y = tbl.ReportedWeight - tbl.Weight;
 [x, I] = sort(x);
 y = y(I);
- 
-% mdl = TreeBagger(250, x, y, 'Method', 'regression');
-% tau = [0.1 0.25, 0.5, 0.75, 0.9];
-% quantiles = quantilePredict(mdl, x, 'Quantile', tau);
-% figure;
-% plot(x,x,'-k', x,quantiles(:,1), x,quantiles(:,2), x,quantiles(:,3), x,quantiles(:,4), x,quantiles(:,5))
-% legend('45 deg line', 'lower decile', 'lower quartile', 'median', 'upper quartile', 'upper decile')
-
 
 order = 2; 
 [p,stats] = quantreg(x, y, 0.1, order);
@@ -820,14 +646,13 @@ ylabel('Quantiles of Reporting Error (kg)', 'interpreter', 'latex')
 title('Reporting Error in Weight (Male)', 'interpreter', 'latex')
 box on
 
-%% Quantile Regression Weight (female only)
+%% Quantile Regression Weight (female only) - Figure 7
 tbl = caesar;
 
 % creating a subset that satisfies criteria (ex: selecting males, white collar)
 rows = strcmp(tbl.Gender, 'Female');
 tbl = tbl(rows,:);
  
-% vars = {'ReportedHeight', 'Stature'};
 vars = {'ReportedWeight', 'Weight'};
 tbl = tbl(:, vars);
  
@@ -838,20 +663,10 @@ tbl(any(TF,2),:);
 % remove rows with missing data
 tbl = rmmissing(tbl);
  
-% x = tbl.Stature;
-% y = tbl.ReportedHeight;
 x = tbl.Weight;
 y = tbl.ReportedWeight - tbl.Weight;
 [x, I] = sort(x);
 y = y(I);
- 
-% mdl = TreeBagger(250, x, y, 'Method', 'regression');
-% tau = [0.1 0.25, 0.5, 0.75, 0.9];
-% quantiles = quantilePredict(mdl, x, 'Quantile', tau);
-% figure;
-% plot(x,x,'-k', x,quantiles(:,1), x,quantiles(:,2), x,quantiles(:,3), x,quantiles(:,4), x,quantiles(:,5))
-% legend('45 deg line', 'lower decile', 'lower quartile', 'median', 'upper quartile', 'upper decile')
-
 
 order = 2; 
 [p,stats] = quantreg(x, y, 0.1, order);
@@ -922,1106 +737,11 @@ title('Reporting Error in Weight (Female)', 'interpreter', 'latex')
 box on
 
 
-%% Female Body Types Vs. P3 (Lee et al. 2007)
-gender = 'Female';
-rows = strcmp(tbl.Gender, gender);
-tbl = tbl(rows,:);
- 
-bust = tbl.ChestCircumference;
-waist = tbl.WaistCircumference_Pref;
-hips = tbl.HipCircumference_Maximum;
 
-in = 25.4;
-% Hourglass
-% If (bust ? hips) ? 1" AND (hips ? bust) < 3.6" AND (bust ? waist) ? 9" OR (hips ? waist) ? 10"
-hourglass = (bust-hips <= in) & (hips-bust < 3.6*in) & (bust-waist >= 9*in) | (hips-waist >= 10*in);
-% Bottom hourglass
-% If (hips ? bust) ? 3.6" AND (hips ? bust) < 10" AND (hips ? waist) ? 9" AND (high hip/waist) < 1.193
-btmhour = (hips-bust >= 3.6*in) & (hips-bust < 10*in) & (hips-waist >= 9*in) & (hips./waist < 1.193);
-% Top hourglass
-% If (bust ? hips) > 1" AND (bust ? hips) < 10" AND (bust ? waist) ? 9"
-tophour = (bust-hips > 1*in) & (bust-hips < 10*in) & (bust-waist >= 9*in);
-% Spoon
-% If (hips ? bust) > 2" AND (hips ? waist) ? 7" AND (high hip/waist) ? 1.193
-spoon = (hips-bust > 2*in) & (hips-waist >= 7*in) & (hip./waist >= 1.193);
-% Triangle
-% If (hips ? bust) ? 3.6" AND (hips ? waist) < 9"
-triangle = (hips-bust >= 3.6*in) & (hips-waist < 9*in);
-% Inverted triangle
-% If (bust ? hips) ? 3.6" AND (bust ? waist) < 9"
-invtri = (bust-hips >= 3.6*in) & (bust-waist < 9*in);
-% Rectangle
-% If (hips ? bust) < 3.6" AND (bust ? hips) < 3.6" AND (bust ? waist) < 9" AND (hips ? waist) < 10"
-rect = (hips-bust < 3.6*in) & (bust-hips < 3.6*in) & (bust-waist < 9*in) & (hips-waist < 10*in);
-
-xr = -3:0.1:3;
-figure; plot(xr, normpdf(xr, mean(tbl.Var3(find(hourglass))), std(tbl.Var3(find(hourglass)))), 'r')
-hold on;plot(xr, normpdf(xr, mean(tbl.Var3(find(spoon))), std(tbl.Var3(find(spoon)))), 'b')
-hold on;plot(xr, normpdf(xr, mean(tbl.Var3(find(triangle))), std(tbl.Var3(find(triangle)))), 'g')
-hold on;plot(xr, normpdf(xr, mean(tbl.Var3(find(invtri))), std(tbl.Var3(find(invtri)))), 'k')
-hold on;plot(xr, normpdf(xr, mean(tbl.Var3(find(rect))), std(tbl.Var3(find(rect)))), 'c')
-
-
-%% BMI vs Income (male only)
+%% LASSO - Various body measures (Male only) - Figure 10
 % adding new variables
 BMI = caesar.Weight./(caesar.Stature*0.001).^2;
 AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'AgeSquared', 'Experience', 'ExperienceSquared', 'CarAge'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- rows = strcmp(tbl.Gender, 'Male');
- tbl = tbl(rows,:);
- 
-%selecting variables for analysis
-%  vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%      'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'CarMake','CarModel', 'CarAge', 'ShoeSize',...
-%      'JacketSize', 'PantsSizeWaist', 'PantsSizeInseam',  'BMI', 'Weight'};
- 
-%    vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%       'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'BMI', 'Stature'};
-
-    vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
-         'NumberOfChildren', 'Fitness', 'CarModel',  'BirthState',  'Stature', 'BMI'};
-     
-
-  
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
- 
-% take log on family income
- tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
- mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
- 
-coeff_estimate = mdl.Coefficients.Estimate';
-
-% Bootstrap
-N = size(tbl.FamilyIncome,1);
-
-MAX_ITER = 1000;
-
-bootstrap_coeff = [];
-for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
-    idx = randi(height(tbl), N,1);
-
-    bootstrap_tbl = tbl(idx,:);
-    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
-    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
-        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
-    end
-end
-
-bootstrap_estimate = mean(bootstrap_coeff');
-bootstrap_SE = std(bootstrap_coeff');
-t_stat = coeff_estimate./bootstrap_SE;
-fprintf('Bootstrap\n');
-fprintf('============================================\n');
-fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
-for i=1:length(bootstrap_estimate)
-    str = mdl.CoefficientNames{i};
-    if length(str) > 20
-        str = [str(1:5), '...', str(end-10:end)];
-    end
-    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
-end
-
- 
- %% Height/Weight vs Income (male only)
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-
-
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- rows = strcmp(tbl.Gender, 'Male');
- tbl = tbl(rows,:);
- 
-% selecting variables for analysis
-%  vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%      'Fitness', 'MaritalStatus', 'Race', 'BirthState',  'Stature', 'Weight'};
-
-
-
-  vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
-         'MaritalStatus', 'Race',  'NumberOfChildren', 'Stature', 'Weight'};
- 
-     
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
- 
-% take log on family income
- tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
- mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
- 
-coeff_estimate = mdl.Coefficients.Estimate';
-
-% Bootstrap
-N = size(tbl.FamilyIncome,1);
-
-MAX_ITER = 1000;
-
-bootstrap_coeff = [];
-for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
-    idx = randi(height(tbl), N,1);
-
-    bootstrap_tbl = tbl(idx,:);
-    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
-    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
-        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
-    end
-end
-
-bootstrap_estimate = mean(bootstrap_coeff');
-bootstrap_SE = std(bootstrap_coeff');
-t_stat = coeff_estimate./bootstrap_SE;
-fprintf('Bootstrap\n');
-fprintf('============================================\n');
-fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
-for i=1:length(bootstrap_estimate)
-    str = mdl.CoefficientNames{i};
-    if length(str) > 20
-        str = [str(1:5), '...', str(end-10:end)];
-    end
-    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
-end
-
-
-  %% Reported Height/Weight vs Income (male only)
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-HeightError = caesar.ReportedHeight - caesar.Stature;
-WeightError = caesar.ReportedWeight - caesar.Weight;
-
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, HeightError, WeightError], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge', 'HeightError', 'WeightError'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- rows = strcmp(tbl.Gender, 'Male');
- tbl = tbl(rows,:);
- 
-% selecting variables for analysis
-%  vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%      'Fitness', 'MaritalStatus', 'Race', 'BirthState',  'ReportedHeight', 'ReportedWeight'};
-
- vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
-         'MaritalStatus', 'Race',  'NumberOfChildren', 'ReportedHeight', 'ReportedWeight'};
- 
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
- 
-% take log on family income
-  tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
-  mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
- 
-  %figure; scatter(tbl.Stature, tbl.HeightError); lsline; grid on;
- 
-coeff_estimate = mdl.Coefficients.Estimate';
-
-% Bootstrap
-N = size(tbl.FamilyIncome,1);
-
-MAX_ITER = 1000;
-
-bootstrap_coeff = [];
-for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
-    idx = randi(height(tbl), N,1);
-
-    bootstrap_tbl = tbl(idx,:);
-    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
-    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
-        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
-    end
-end
-
-bootstrap_estimate = mean(bootstrap_coeff');
-bootstrap_SE = std(bootstrap_coeff');
-t_stat = coeff_estimate./bootstrap_SE;
-fprintf('Bootstrap\n');
-fprintf('============================================\n');
-fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
-for i=1:length(bootstrap_estimate)
-    str = mdl.CoefficientNames{i};
-    if length(str) > 20
-        str = [str(1:5), '...', str(end-10:end)];
-    end
-    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
-end
-
-
-
-%% Reported BMI vs Income (male only)
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-ReportedBMI = caesar.ReportedWeight./(caesar.ReportedHeight*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-WeightError = caesar.ReportedWeight - caesar.Weight;
-BMIError = ReportedBMI - BMI;
-HeightError = caesar.ReportedHeight - caesar.Stature;
-
-tbl = [caesar, array2table([BMI, ReportedBMI, WeightError, BMIError, HeightError, AgeSquared,  Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'ReportedBMI', 'WeightError', 'BMIError', 'HeightError', 'AgeSquared', 'Experience', 'ExperienceSquared', 'CarAge'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- rows = strcmp(tbl.Gender, 'Male');
- tbl = tbl(rows,:);
- 
-%selecting variables for analysis
-%  vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%      'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'CarMake','CarModel', 'CarAge', 'ShoeSize',...
-%      'JacketSize', 'PantsSizeWaist', 'PantsSizeInseam',  'BMI', 'Weight'};
- 
-%    vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%       'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'ReportedBMI', 'ReportedWeight'};
-
-   vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
-           'MaritalStatus', 'Race', 'NumberOfChildren', 'ReportedBMI', 'ReportedHeight'};
-  
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
- 
-% take log on family income
- tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
- mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
-
- %figure; scatter(tbl.Weight, tbl.WeightError); lsline;
- 
-coeff_estimate = mdl.Coefficients.Estimate';
-
-% Bootstrap
-N = size(tbl.FamilyIncome,1);
-
-MAX_ITER = 1000;
-
-bootstrap_coeff = [];
-for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
-    idx = randi(height(tbl), N,1);
-
-    bootstrap_tbl = tbl(idx,:);
-    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
-    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
-        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
-    end
-end
-
-bootstrap_estimate = mean(bootstrap_coeff');
-bootstrap_SE = std(bootstrap_coeff');
-t_stat = coeff_estimate./bootstrap_SE;
-fprintf('Bootstrap\n');
-fprintf('============================================\n');
-fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
-for i=1:length(bootstrap_estimate)
-    str = mdl.CoefficientNames{i};
-    if length(str) > 20
-        str = [str(1:5), '...', str(end-10:end)];
-    end
-    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
-end
-
-
-%% Managerial position vs. Body shapes
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-%Mng = strcmp(caesar.Occupation, 'Management') | strcmp(caesar.Occupation, 'White');
-Mng = strcmp(caesar.Occupation, 'Management');
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, Mng], 'VariableNames', {'BMI', 'AgeSquared', 'Experience', 'ExperienceSquared', 'CarAge', 'Managerial'})];
-
-%rows = strcmp(tbl.Gender, 'Female')
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
-%  rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
-%  rows = strcmp(tbl.Gender, 'Female');
-% rows = strcmp(tbl.Race, 'White') & strcmp(tbl.Gender, 'Male');
-%rows = strcmp(tbl.Gender, 'Female')& strcmp(tbl.MaritalStatus, 'Single')& strcmp(tbl.Race, 'White');
-rows = strcmp(tbl.Gender, 'Male'); 
-tbl = tbl(rows,:);
-
-% selecting variables for analysis
-%  vars = { 'Managerial',   'Education', 'NumberOfChildren', 'MaritalStatus', 'FamilyIncome', ...
-%       'Fitness',  'BirthState', 'Site', 'CarModel', 'CarAge',  'Var1', 'Var2', 'Var3'};
-   vars = { 'Managerial',    'Var1'};
-   
-   
-%  vars = { 'Managerial',  'Education', 'NumberOfChildren',...
-%       'Fitness', 'MaritalStatus',  'BirthState', 'Stature', 'BMI'};
-%vars = { 'Managerial', 'Var1', 'Var2', 'Var3'};
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing dataf
- tbl = rmmissing(tbl);
- 
-% take log on family income 
-% tbl.FamilyIncome = log(tbl.FamilyIncome);
-
-
-[B, dev, stat] = mnrfit(tbl.Var1, categorical(tbl.Managerial))
-
-%%
-
-
-% fit a model
- mdl = fitlm(tbl, 'ResponseVar', 'Managerial')
-
- coeff_estimate = mdl.Coefficients.Estimate';
- 
-% Bootstrap
-N = size(tbl.FamilyIncome,1);
-
-MAX_ITER = 1000;
-
-bootstrap_coeff = [];
-for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
-    idx = randi(height(tbl), N,1);
-
-    bootstrap_tbl = tbl(idx,:);
-    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'Managerial');
-    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
-        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
-    end
-end
-
-bootstrap_estimate = mean(bootstrap_coeff');
-bootstrap_SE = std(bootstrap_coeff');
-t_stat = coeff_estimate./bootstrap_SE;
-fprintf('Bootstrap\n');
-fprintf('============================================\n');
-fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
-for i=1:length(bootstrap_estimate)
-    str = mdl.CoefficientNames{i};
-    if length(str) > 20
-        str = [str(1:5), '...', str(end-10:end)];
-    end
-    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
-end
-
- %% BMI vs Income (Female only)
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-Hip2Waist = caesar.HipCircumference_Maximum./caesar.WaistCircumference_Pref.*100;
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, Hip2Waist], 'VariableNames', {'BMI', 'AgeSquared', 'Experience', 'ExperienceSquared', 'CarAge', 'Hip2Waist'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- rows = strcmp(tbl.Gender, 'Female');
- tbl = tbl(rows,:);
- 
-%selecting variables for analysis
-%  vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%      'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'CarMake','CarModel', 'CarAge', 'ShoeSize',...
-%      'JacketSize', 'PantsSizeWaist', 'PantsSizeInseam',  'BMI'};
- 
-%   vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%      'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'CarMake','CarModel', 'CarAge', 'ShoeSize',...
-%      'BlouseSize', 'PantsSizeWoman', 'BraSize', 'CupSize','BMI'};
-
- 
-%     vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
-%          'NumberOfChildren', 'Fitness', 'CarModel', 'CarAge', 'BirthState', 'Site', 'Stature', 'BMI'};
-     
-   vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
-           'MaritalStatus', 'Race', 'NumberOfChildren', 'Fitness',  'CarModel', 'BirthState', 'BMI', 'Stature', 'Hip2Waist'};
- 
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
- 
-% take log on family income
- tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
- mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
-
-coeff_estimate = mdl.Coefficients.Estimate';
-
-% Bootstrap
-N = size(tbl.FamilyIncome,1);
-
-MAX_ITER = 1000;
-
-bootstrap_coeff = [];
-for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
-    idx = randi(height(tbl), N,1);
-
-    bootstrap_tbl = tbl(idx,:);
-    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
-    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
-        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
-    end
-end
-
-bootstrap_estimate = mean(bootstrap_coeff');
-bootstrap_SE = std(bootstrap_coeff');
-t_stat = coeff_estimate./bootstrap_SE;
-fprintf('Bootstrap\n');
-fprintf('============================================\n');
-fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
-for i=1:length(bootstrap_estimate)
-    str = mdl.CoefficientNames{i};
-    if length(str) > 20
-        str = [str(1:5), '...', str(end-10:end)];
-    end
-    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
-end
-
-
-%% Height/Weight vs Income (Female only)
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- rows = strcmp(tbl.Gender, 'Female');
- tbl = tbl(rows,:);
- 
-% selecting variables for analysis
-%  vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%      'Fitness', 'MaritalStatus', 'Race', 'BirthState',  'Stature', 'Weight'};
-
-
- vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
-         'MaritalStatus', 'Race',  'NumberOfChildren', 'Stature', 'Weight'};
- 
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
- 
-% take log on family income
- tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
- mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
-
-coeff_estimate = mdl.Coefficients.Estimate';
-
-% Bootstrap
-N = size(tbl.FamilyIncome,1);
-
-MAX_ITER = 1000;
-
-bootstrap_coeff = [];
-for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
-    idx = randi(height(tbl), N,1);
-
-    bootstrap_tbl = tbl(idx,:);
-    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
-    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
-        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
-    end
-end
-
-bootstrap_estimate = mean(bootstrap_coeff');
-bootstrap_SE = std(bootstrap_coeff');
-t_stat = coeff_estimate./bootstrap_SE;
-fprintf('Bootstrap\n');
-fprintf('============================================\n');
-fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
-for i=1:length(bootstrap_estimate)
-    str = mdl.CoefficientNames{i};
-    if length(str) > 20
-        str = [str(1:5), '...', str(end-10:end)];
-    end
-    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
-end
-
-
-  %% Reported Height/Weight vs Income (Female only)
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-HeightError = caesar.ReportedHeight - caesar.Stature;
-WeightError = caesar.ReportedWeight - caesar.Weight;
-
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, HeightError, WeightError], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge', 'HeightError', 'WeightError'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- rows = strcmp(tbl.Gender, 'Female');
- tbl = tbl(rows,:);
- 
-% selecting variables for analysis
-%  vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%      'Fitness', 'MaritalStatus', 'Race', 'BirthState',  'ReportedHeight', 'ReportedWeight'};
-
- vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
-         'MaritalStatus', 'Race',  'NumberOfChildren', 'ReportedHeight', 'ReportedWeight'};
- 
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
- 
-% take log on family income
-  tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
-  mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
- 
-  %figure; scatter(tbl.Stature, tbl.HeightError); lsline; grid on;
-
-coeff_estimate = mdl.Coefficients.Estimate';
-
-% Bootstrap
-N = size(tbl.FamilyIncome,1);
-
-MAX_ITER = 1000;
-
-bootstrap_coeff = [];
-for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
-    idx = randi(height(tbl), N,1);
-
-    bootstrap_tbl = tbl(idx,:);
-    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
-    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
-        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
-    end
-end
-
-bootstrap_estimate = mean(bootstrap_coeff');
-bootstrap_SE = std(bootstrap_coeff');
-t_stat = coeff_estimate./bootstrap_SE;
-fprintf('Bootstrap\n');
-fprintf('============================================\n');
-fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
-for i=1:length(bootstrap_estimate)
-    str = mdl.CoefficientNames{i};
-    if length(str) > 20
-        str = [str(1:5), '...', str(end-10:end)];
-    end
-    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
-end
-
-
-
-%% Reported BMI vs Income (Female only)
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-ReportedBMI = caesar.ReportedWeight./(caesar.ReportedHeight*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-WeightError = caesar.ReportedWeight - caesar.Weight;
-BMIError = ReportedBMI - BMI;
-HeightError = caesar.ReportedHeight - caesar.Stature;
-
-tbl = [caesar, array2table([BMI, ReportedBMI, WeightError, BMIError, HeightError, AgeSquared,  Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'ReportedBMI', 'WeightError', 'BMIError', 'HeightError', 'AgeSquared', 'Experience', 'ExperienceSquared', 'CarAge'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- rows = strcmp(tbl.Gender, 'Female');
- tbl = tbl(rows,:);
- 
-%selecting variables for analysis
-%  vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%      'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'CarMake','CarModel', 'CarAge', 'ShoeSize',...
-%      'JacketSize', 'PantsSizeWaist', 'PantsSizeInseam',  'BMI', 'Weight'};
- 
-%    vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%       'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'ReportedBMI', 'ReportedHeight'};
- 
-   vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
-           'MaritalStatus', 'Race', 'NumberOfChildren', 'ReportedBMI', 'ReportedHeight'};
-  
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
- 
-% take log on family income
- tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
- mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
- 
-%figure; scatter(tbl.Weight, tbl.WeightError); lsline;
-
-coeff_estimate = mdl.Coefficients.Estimate';
-
-% Bootstrap
-N = size(tbl.FamilyIncome,1);
-
-MAX_ITER = 1000;
-
-bootstrap_coeff = [];
-for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
-    idx = randi(height(tbl), N,1);
-
-    bootstrap_tbl = tbl(idx,:);
-    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
-    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
-        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
-    end
-end
-
-bootstrap_estimate = mean(bootstrap_coeff');
-bootstrap_SE = std(bootstrap_coeff');
-t_stat = coeff_estimate./bootstrap_SE;
-fprintf('Bootstrap\n');
-fprintf('============================================\n');
-fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
-for i=1:length(bootstrap_estimate)
-    str = mdl.CoefficientNames{i};
-    if length(str) > 20
-        str = [str(1:5), '...', str(end-10:end)];
-    end
-    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
-end
-
-
-  %% Reporting Error in Height/Weight vs Income (male only)
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-ReportedBMI = caesar.ReportedWeight./(caesar.ReportedHeight*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-WeightError = caesar.ReportedWeight - caesar.Weight;
-BMIError = ReportedBMI - BMI;
-HeightError = caesar.ReportedHeight - caesar.Stature;
-
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, HeightError, WeightError, BMIError], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge', 'HeightError', 'WeightError', 'BMIError'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- rows = strcmp(tbl.Gender, 'Male');
- tbl = tbl(rows,:);
- 
-% selecting variables for analysis
- % vars = {'FamilyIncome',  'Age', 'AgeSquared', 'Occupation', 'Education', ...
- %     'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'WeightError'};
- 
-vars = {'FamilyIncome', 'Age', 'AgeSquared',  'Occupation', 'Education', ...
-    'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'WeightError', 'Weight'};
- 
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
- 
-% take log on family income
-  tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
-  mdl = fitlm(tbl, 'ResponseVar', 'WeightError')
- 
-  %figure; scatter(tbl.Stature, tbl.HeightError); lsline; grid on;
-  %figure; scatter(tbl.Weight, tbl.WeightError); lsline; grid on;
-  
-coeff_estimate = mdl.Coefficients.Estimate';
-
-% Bootstrap
-N = size(tbl.FamilyIncome,1);
-
-MAX_ITER = 1000;
-
-bootstrap_coeff = [];
-for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
-    idx = randi(height(tbl), N,1);
-
-    bootstrap_tbl = tbl(idx,:);
-    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'WeightError');
-    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
-        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
-    end
-end
-
-bootstrap_estimate = mean(bootstrap_coeff');
-bootstrap_SE = std(bootstrap_coeff');
-t_stat = coeff_estimate./bootstrap_SE;
-fprintf('Bootstrap\n');
-fprintf('============================================\n');
-fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
-for i=1:length(bootstrap_estimate)
-    str = mdl.CoefficientNames{i};
-    if length(str) > 20
-        str = [str(1:5), '...', str(end-10:end)];
-    end
-    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
-end
-
-  
-  %% Reporting Error in Height/Weight vs Income (Female only)
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-ReportedBMI = caesar.ReportedWeight./(caesar.ReportedHeight*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-WeightError = caesar.ReportedWeight - caesar.Weight;
-BMIError = ReportedBMI - BMI;
-HeightError = caesar.ReportedHeight - caesar.Stature;
-
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, HeightError, WeightError, BMIError], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge', 'HeightError', 'WeightError', 'BMIError'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- rows = strcmp(tbl.Gender, 'Female');
- tbl = tbl(rows,:);
- 
-% selecting variables for analysis
- vars = {'FamilyIncome',  'Age', 'AgeSquared', 'Occupation', 'Education', ...
-     'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'WeightError', 'Weight'};
- 
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
- 
-% take log on family income
-  tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
-  mdl = fitlm(tbl, 'ResponseVar', 'WeightError')
- 
-  %figure; scatter(tbl.Stature, tbl.HeightError); lsline; grid on;
-  %figure; scatter(tbl.Weight, tbl.WeightError); lsline; grid on;
-
-coeff_estimate = mdl.Coefficients.Estimate';
-  
-% Bootstrap
-N = size(tbl.FamilyIncome,1);
-
-MAX_ITER = 1000;
-
-bootstrap_coeff = [];
-for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
-    idx = randi(height(tbl), N,1);
-
-    bootstrap_tbl = tbl(idx,:);
-    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'WeightError');
-    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
-        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
-    end
-end
-
-bootstrap_estimate = mean(bootstrap_coeff');
-bootstrap_SE = std(bootstrap_coeff');
-t_stat = coeff_estimate./bootstrap_SE;
-fprintf('Bootstrap\n');
-fprintf('============================================\n');
-fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
-for i=1:length(bootstrap_estimate)
-    str = mdl.CoefficientNames{i};
-    if length(str) > 20
-        str = [str(1:5), '...', str(end-10:end)];
-    end
-    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
-end
-
-
-%% Reported Height/Weight vs Measured Height/Weight (male only)
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-ReportedBMI = caesar.ReportedWeight./(caesar.ReportedHeight*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-WeightError = caesar.ReportedWeight - caesar.Weight;
-BMIError = ReportedBMI - BMI;
-HeightError = caesar.ReportedHeight - caesar.Stature;
-
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, HeightError, WeightError, BMIError], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge', 'HeightError', 'WeightError', 'BMIError'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- rows = strcmp(tbl.Gender, 'Male');
- tbl = tbl(rows,:);
- 
-
- 
-vars = {'FamilyIncome', 'Age', 'AgeSquared',  'Occupation', 'Education', 'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'ReportedHeight', 'Stature'};
- 
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
- 
-% take log on family income
-  tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
-  mdl = fitlm(tbl, 'ResponseVar', 'ReportedHeight')
- 
-  %figure; scatter(tbl.Stature, tbl.HeightError); lsline; grid on;
-  %figure; scatter(tbl.Weight, tbl.WeightError); lsline; grid on;
-  
-
-      %% Reported Height/Weight vs Measured Height/Weight (Female only)
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-ReportedBMI = caesar.ReportedWeight./(caesar.ReportedHeight*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-WeightError = caesar.ReportedWeight - caesar.Weight;
-BMIError = ReportedBMI - BMI;
-HeightError = caesar.ReportedHeight - caesar.Stature;
-
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, HeightError, WeightError, BMIError], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge', 'HeightError', 'WeightError', 'BMIError'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- rows = strcmp(tbl.Gender, 'Female');
- tbl = tbl(rows,:);
- 
-
- 
-vars = {'FamilyIncome', 'Age', 'AgeSquared',  'Occupation', 'Education', 'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'ReportedHeight', 'Stature'};
- 
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
- 
-% take log on family income
-  tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
-  mdl = fitlm(tbl, 'ResponseVar', 'ReportedHeight')
- 
-  %figure; scatter(tbl.Stature, tbl.HeightError); lsline; grid on;
-  %figure; scatter(tbl.Weight, tbl.WeightError); lsline; grid on;
-  
-%% Various body measures vs Income
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-
-%CupBra = caesar.CupSize./caesar.BraSize;
-%Muscularity = BMI./caesar.WaistCircumference_Pref;
-
-%tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, CupBra, Muscularity], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge', 'CupBra', 'Muscularity'})];
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- gender = 'Male';
- %rows = strcmp(tbl.Gender, gender) & tbl.Age >30 & tbl.Age < 60;
- rows = strcmp(tbl.Gender, gender);
- tbl = tbl(rows,:);
- 
-% selecting variables for analysis
-% vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%         'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'BraSize', 'CupSize', 'CupBra', 'Muscularity'};
-    
-vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
-         'MaritalStatus', 'Race', 'NumberOfChildren'};
- 
-
-if strcmp(gender, 'Male') == 1
-    vars = cat(2, vars, caesar.Properties.VariableNames(setdiff(26:70,[36,28,29,61,62,63])));
-else
-    vars = cat(2, vars, caesar.Properties.VariableNames(setdiff(26:70,[28,29,61,62,63])));
-end
-tbl = tbl(:, vars);
-
-%tbl = tbl(:, { 'Muscularity',   'FamilyIncome'});
-
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
- 
-% take log on family income
- tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
- mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome') 
-%  
-% tbl2 = tbl;
-% tbl2 = removevars(tbl, 'FamilyIncome');
-% tbl2.Occupation = categorical(tbl2.Occupation);
-% tbl2.MaritalStatus = categorical(tbl2.MaritalStatus);
-% tbl2.Race = categorical(tbl2.Race);
-%  mdl_lasso = lasso(table2array(tbl2), tbl.FamilyIncome)
-
-
-coeff_estimate = mdl.Coefficients.Estimate';
-
-% Bootstrap
-N = size(tbl.FamilyIncome,1);
-
-MAX_ITER = 1000;
-
-bootstrap_coeff = [];
-for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
-    idx = randi(height(tbl), N,1);
-
-    bootstrap_tbl = tbl(idx,:);
-    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
-    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
-        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
-    end
-end
-
-bootstrap_estimate = mean(bootstrap_coeff');
-bootstrap_SE = std(bootstrap_coeff');
-t_stat = coeff_estimate./bootstrap_SE;
-fprintf('Bootstrap\n');
-fprintf('============================================\n');
-fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
-for i=1:length(bootstrap_estimate)
-    str = mdl.CoefficientNames{i};
-    if length(str) > 20
-        str = [str(1:5), '...', str(end-10:end)];
-    end
-    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
-end
-
-
-%% LASSO - Various body measures (Male only)
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
 Exp = max(caesar.Age - caesar.Education - 6,0);
 ExpSquared = Exp.^2;
 CarAge = 2001-caesar.CarYear;
@@ -2046,17 +766,6 @@ end
 tbl = tbl(:, vars);
 n_measures = length(vars) - n_others;
  
-% rows = strcmp(tbl.Occupation, 'White Collar');
-% tbl = tbl(rows,:);
-%  
-% rows = strcmp(tbl.MaritalStatus, 'Married');
-% tbl = tbl(rows,:);
-% 
-% rows = strcmp(tbl.Race, 'White');
-% tbl = tbl(rows,:);
-% 
-% rows = ~strcmp(tbl.Race, 'Foreign');
-% tbl = tbl(rows,:);
 
 % find rows with missing data
  TF = ismissing(tbl);
@@ -2087,7 +796,6 @@ D = x2fx(tbl3, 'Interaction');
 D(:,1) = [];
 D = [table2array(tbl2(:, 1:n_others)), D];
 
-% [B, fitInfo] = lasso(table2array(tbl2), tbl.FamilyIncome, 'PredictorNames', tbl2.Properties.VariableNames);
 [B, fitInfo] = lasso(D, tbl.FamilyIncome, 'CV', 10);
 
 
@@ -2116,11 +824,10 @@ fprintf('===============================================\n');
 
 mdl_lasso = fitlm(D(:, find(B(:,fitInfo.IndexMinMSE))), tbl.FamilyIncome);
 
-%% LASSO - Various body measures (Female only)
+%% LASSO - Various body measures (Female only) - Figure 10
 % adding new variables
 BMI = caesar.Weight./(caesar.Stature*0.001).^2;
 AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
 Exp = max(caesar.Age - caesar.Education - 6,0);
 ExpSquared = Exp.^2;
 CarAge = 2001-caesar.CarYear;
@@ -2144,18 +851,6 @@ else
 end
 tbl = tbl(:, vars);
 n_measures = length(vars) - n_others;
- 
-% rows = strcmp(tbl.Occupation, 'White Collar');
-% tbl = tbl(rows,:);
-%  
-% rows = strcmp(tbl.MaritalStatus, 'Married');
-% tbl = tbl(rows,:);
-% 
-% rows = strcmp(tbl.Race, 'White');
-% tbl = tbl(rows,:);
-% 
-% rows = ~strcmp(tbl.Race, 'Foreign');
-% tbl = tbl(rows,:);
 
 % find rows with missing data
  TF = ismissing(tbl);
@@ -2188,7 +883,6 @@ D = x2fx(tbl3, 'Interaction');
 D(:,1) = [];
 D = [table2array(tbl2(:, 1:n_others)), D];
 
-% [B, fitInfo] = lasso(table2array(tbl2), tbl.FamilyIncome, 'PredictorNames', tbl2.Properties.VariableNames);
 [B, fitInfo] = lasso(D, tbl.FamilyIncome, 'CV', 10);
 
 
@@ -2215,11 +909,845 @@ fprintf('===============================================\n');
 
 mdl_lasso = fitlm(D(:, find(B(:,fitInfo.IndexMinMSE))), tbl.FamilyIncome);
 
- %% Body types from deep learning vs Income (male only)
+
+  %% Reporting Error in Height/Weight vs Income (male only) - Table 4
+% adding new variables
+BMI = caesar.Weight./(caesar.Stature*0.001).^2;
+ReportedBMI = caesar.ReportedWeight./(caesar.ReportedHeight*0.001).^2;
+AgeSquared = caesar.Age.^2;
+Exp = max(caesar.Age - caesar.Education - 6,0);
+ExpSquared = Exp.^2;
+CarAge = 2001-caesar.CarYear;
+WeightError = caesar.ReportedWeight - caesar.Weight;
+BMIError = ReportedBMI - BMI;
+HeightError = caesar.ReportedHeight - caesar.Stature;
+
+tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, HeightError, WeightError, BMIError], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge', 'HeightError', 'WeightError', 'BMIError'})];
+
+% creating a subset that satisfies criteria (ex: selecting males, white collar)
+ rows = strcmp(tbl.Gender, 'Male');
+ tbl = tbl(rows,:);
+ 
+% selecting variables for analysis
+vars = {'FamilyIncome', 'Age', 'AgeSquared',  'Occupation', 'Education', ...
+    'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'WeightError', 'Weight'};
+ 
+ tbl = tbl(:, vars);
+ 
+% find rows with missing data
+ TF = ismissing(tbl);
+ tbl(any(TF,2),:);
+ 
+% remove rows with missing data
+ tbl = rmmissing(tbl);
+ 
+% take log on family income
+  tbl.FamilyIncome = log(tbl.FamilyIncome);
+ 
+% fit a model
+  mdl = fitlm(tbl, 'ResponseVar', 'WeightError')
+  
+coeff_estimate = mdl.Coefficients.Estimate';
+
+% Bootstrap
+N = size(tbl.FamilyIncome,1);
+
+MAX_ITER = 1000;
+
+bootstrap_coeff = [];
+for i=1:MAX_ITER
+
+    idx = randi(height(tbl), N,1);
+
+    bootstrap_tbl = tbl(idx,:);
+    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'WeightError');
+    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
+        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
+    end
+end
+
+bootstrap_estimate = mean(bootstrap_coeff');
+bootstrap_SE = std(bootstrap_coeff');
+t_stat = coeff_estimate./bootstrap_SE;
+fprintf('Bootstrap\n');
+fprintf('============================================\n');
+fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
+for i=1:length(bootstrap_estimate)
+    str = mdl.CoefficientNames{i};
+    if length(str) > 20
+        str = [str(1:5), '...', str(end-10:end)];
+    end
+    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
+end
+
+  
+  %% Reporting Error in Height/Weight vs Income (Female only) - Table 4
+% adding new variables
+BMI = caesar.Weight./(caesar.Stature*0.001).^2;
+ReportedBMI = caesar.ReportedWeight./(caesar.ReportedHeight*0.001).^2;
+AgeSquared = caesar.Age.^2;
+Exp = max(caesar.Age - caesar.Education - 6,0);
+ExpSquared = Exp.^2;
+CarAge = 2001-caesar.CarYear;
+WeightError = caesar.ReportedWeight - caesar.Weight;
+BMIError = ReportedBMI - BMI;
+HeightError = caesar.ReportedHeight - caesar.Stature;
+
+tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, HeightError, WeightError, BMIError], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge', 'HeightError', 'WeightError', 'BMIError'})];
+
+% creating a subset that satisfies criteria (ex: selecting males, white collar)
+ rows = strcmp(tbl.Gender, 'Female');
+ tbl = tbl(rows,:);
+ 
+% selecting variables for analysis
+ vars = {'FamilyIncome',  'Age', 'AgeSquared', 'Occupation', 'Education', ...
+     'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'WeightError', 'Weight'};
+ 
+ tbl = tbl(:, vars);
+ 
+% find rows with missing data
+ TF = ismissing(tbl);
+ tbl(any(TF,2),:);
+ 
+% remove rows with missing data
+ tbl = rmmissing(tbl);
+ 
+% take log on family income
+  tbl.FamilyIncome = log(tbl.FamilyIncome);
+ 
+% fit a model
+  mdl = fitlm(tbl, 'ResponseVar', 'WeightError')
+
+coeff_estimate = mdl.Coefficients.Estimate';
+  
+% Bootstrap
+N = size(tbl.FamilyIncome,1);
+
+MAX_ITER = 1000;
+
+bootstrap_coeff = [];
+for i=1:MAX_ITER
+
+    idx = randi(height(tbl), N,1);
+
+    bootstrap_tbl = tbl(idx,:);
+    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'WeightError');
+    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
+        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
+    end
+end
+
+bootstrap_estimate = mean(bootstrap_coeff');
+bootstrap_SE = std(bootstrap_coeff');
+t_stat = coeff_estimate./bootstrap_SE;
+fprintf('Bootstrap\n');
+fprintf('============================================\n');
+fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
+for i=1:length(bootstrap_estimate)
+    str = mdl.CoefficientNames{i};
+    if length(str) > 20
+        str = [str(1:5), '...', str(end-10:end)];
+    end
+    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
+end
+
+
+
+  %% Reported Height/Weight vs Income (male only) - Table 5
 % adding new variables
 BMI = caesar.Weight./(caesar.Stature*0.001).^2;
 AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
+Exp = max(caesar.Age - caesar.Education - 6,0);
+ExpSquared = Exp.^2;
+CarAge = 2001-caesar.CarYear;
+HeightError = caesar.ReportedHeight - caesar.Stature;
+WeightError = caesar.ReportedWeight - caesar.Weight;
+
+tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, HeightError, WeightError], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge', 'HeightError', 'WeightError'})];
+
+% creating a subset that satisfies criteria (ex: selecting males, white collar)
+ rows = strcmp(tbl.Gender, 'Male');
+ tbl = tbl(rows,:);
+ 
+% selecting variables for analysis
+ vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
+         'MaritalStatus', 'Race',  'NumberOfChildren', 'ReportedHeight', 'ReportedWeight'};
+ 
+ tbl = tbl(:, vars);
+ 
+% find rows with missing data
+ TF = ismissing(tbl);
+ tbl(any(TF,2),:);
+ 
+% remove rows with missing data
+ tbl = rmmissing(tbl);
+ 
+% take log on family income
+  tbl.FamilyIncome = log(tbl.FamilyIncome);
+ 
+% fit a model
+  mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
+ 
+coeff_estimate = mdl.Coefficients.Estimate';
+
+% Bootstrap
+N = size(tbl.FamilyIncome,1);
+
+MAX_ITER = 1000;
+
+bootstrap_coeff = [];
+for i=1:MAX_ITER
+
+    idx = randi(height(tbl), N,1);
+
+    bootstrap_tbl = tbl(idx,:);
+    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
+    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
+        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
+    end
+end
+
+bootstrap_estimate = mean(bootstrap_coeff');
+bootstrap_SE = std(bootstrap_coeff');
+t_stat = coeff_estimate./bootstrap_SE;
+fprintf('Bootstrap\n');
+fprintf('============================================\n');
+fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
+for i=1:length(bootstrap_estimate)
+    str = mdl.CoefficientNames{i};
+    if length(str) > 20
+        str = [str(1:5), '...', str(end-10:end)];
+    end
+    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
+end
+
+
+
+  %% Reported Height/Weight vs Income (Female only) - Table 5
+% adding new variables
+BMI = caesar.Weight./(caesar.Stature*0.001).^2;
+AgeSquared = caesar.Age.^2;
+Exp = max(caesar.Age - caesar.Education - 6,0);
+ExpSquared = Exp.^2;
+CarAge = 2001-caesar.CarYear;
+HeightError = caesar.ReportedHeight - caesar.Stature;
+WeightError = caesar.ReportedWeight - caesar.Weight;
+
+tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, HeightError, WeightError], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge', 'HeightError', 'WeightError'})];
+
+% creating a subset that satisfies criteria (ex: selecting males, white collar)
+ rows = strcmp(tbl.Gender, 'Female');
+ tbl = tbl(rows,:);
+ 
+% selecting variables for analysis
+ vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
+         'MaritalStatus', 'Race',  'NumberOfChildren', 'ReportedHeight', 'ReportedWeight'};
+ 
+ tbl = tbl(:, vars);
+ 
+% find rows with missing data
+ TF = ismissing(tbl);
+ tbl(any(TF,2),:);
+ 
+% remove rows with missing data
+ tbl = rmmissing(tbl);
+ 
+% take log on family income
+  tbl.FamilyIncome = log(tbl.FamilyIncome);
+ 
+% fit a model
+  mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
+
+coeff_estimate = mdl.Coefficients.Estimate';
+
+% Bootstrap
+N = size(tbl.FamilyIncome,1);
+
+MAX_ITER = 1000;
+
+bootstrap_coeff = [];
+for i=1:MAX_ITER
+
+    idx = randi(height(tbl), N,1);
+
+    bootstrap_tbl = tbl(idx,:);
+    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
+    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
+        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
+    end
+end
+
+bootstrap_estimate = mean(bootstrap_coeff');
+bootstrap_SE = std(bootstrap_coeff');
+t_stat = coeff_estimate./bootstrap_SE;
+fprintf('Bootstrap\n');
+fprintf('============================================\n');
+fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
+for i=1:length(bootstrap_estimate)
+    str = mdl.CoefficientNames{i};
+    if length(str) > 20
+        str = [str(1:5), '...', str(end-10:end)];
+    end
+    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
+end
+
+
+ %% Height/Weight vs Income (male only) - Tables 6
+% adding new variables
+BMI = caesar.Weight./(caesar.Stature*0.001).^2;
+AgeSquared = caesar.Age.^2;
+Exp = max(caesar.Age - caesar.Education - 6,0);
+ExpSquared = Exp.^2;
+CarAge = 2001-caesar.CarYear;
+
+tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge'})];
+
+% creating a subset that satisfies criteria (ex: selecting males, white collar)
+ rows = strcmp(tbl.Gender, 'Male');
+ tbl = tbl(rows,:);
+ 
+% selecting variables for analysis
+  vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
+         'MaritalStatus', 'Race',  'NumberOfChildren', 'Stature', 'Weight'};
+ 
+     
+ tbl = tbl(:, vars);
+ 
+% find rows with missing data
+ TF = ismissing(tbl);
+ tbl(any(TF,2),:);
+ 
+% remove rows with missing data
+ tbl = rmmissing(tbl);
+ 
+% take log on family income
+ tbl.FamilyIncome = log(tbl.FamilyIncome);
+ 
+% fit a model
+ mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
+ 
+coeff_estimate = mdl.Coefficients.Estimate';
+
+% Bootstrap
+N = size(tbl.FamilyIncome,1);
+
+MAX_ITER = 1000;
+
+bootstrap_coeff = [];
+for i=1:MAX_ITER
+    
+    idx = randi(height(tbl), N,1);
+
+    bootstrap_tbl = tbl(idx,:);
+    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
+    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
+        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
+    end
+end
+
+bootstrap_estimate = mean(bootstrap_coeff');
+bootstrap_SE = std(bootstrap_coeff');
+t_stat = coeff_estimate./bootstrap_SE;
+fprintf('Bootstrap\n');
+fprintf('============================================\n');
+fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
+for i=1:length(bootstrap_estimate)
+    str = mdl.CoefficientNames{i};
+    if length(str) > 20
+        str = [str(1:5), '...', str(end-10:end)];
+    end
+    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
+end
+
+
+
+%% Height/Weight vs Income (Female only) - Table 6
+% adding new variables
+BMI = caesar.Weight./(caesar.Stature*0.001).^2;
+AgeSquared = caesar.Age.^2;
+Exp = max(caesar.Age - caesar.Education - 6,0);
+ExpSquared = Exp.^2;
+CarAge = 2001-caesar.CarYear;
+
+tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge'})];
+
+% creating a subset that satisfies criteria (ex: selecting males, white collar)
+ rows = strcmp(tbl.Gender, 'Female');
+ tbl = tbl(rows,:);
+ 
+% selecting variables for analysis
+ vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
+         'MaritalStatus', 'Race',  'NumberOfChildren', 'Stature', 'Weight'};
+ 
+ tbl = tbl(:, vars);
+ 
+% find rows with missing data
+ TF = ismissing(tbl);
+ tbl(any(TF,2),:);
+ 
+% remove rows with missing data
+ tbl = rmmissing(tbl);
+ 
+% take log on family income
+ tbl.FamilyIncome = log(tbl.FamilyIncome);
+ 
+% fit a model
+ mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
+
+coeff_estimate = mdl.Coefficients.Estimate';
+
+% Bootstrap
+N = size(tbl.FamilyIncome,1);
+
+MAX_ITER = 1000;
+
+bootstrap_coeff = [];
+for i=1:MAX_ITER
+
+    idx = randi(height(tbl), N,1);
+
+    bootstrap_tbl = tbl(idx,:);
+    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
+    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
+        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
+    end
+end
+
+bootstrap_estimate = mean(bootstrap_coeff');
+bootstrap_SE = std(bootstrap_coeff');
+t_stat = coeff_estimate./bootstrap_SE;
+fprintf('Bootstrap\n');
+fprintf('============================================\n');
+fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
+for i=1:length(bootstrap_estimate)
+    str = mdl.CoefficientNames{i};
+    if length(str) > 20
+        str = [str(1:5), '...', str(end-10:end)];
+    end
+    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
+end
+
+
+
+%% Reported BMI vs Income (male only) - Table 7
+% adding new variables
+BMI = caesar.Weight./(caesar.Stature*0.001).^2;
+ReportedBMI = caesar.ReportedWeight./(caesar.ReportedHeight*0.001).^2;
+AgeSquared = caesar.Age.^2;
+Exp = max(caesar.Age - caesar.Education - 6,0);
+ExpSquared = Exp.^2;
+CarAge = 2001-caesar.CarYear;
+WeightError = caesar.ReportedWeight - caesar.Weight;
+BMIError = ReportedBMI - BMI;
+HeightError = caesar.ReportedHeight - caesar.Stature;
+
+tbl = [caesar, array2table([BMI, ReportedBMI, WeightError, BMIError, HeightError, AgeSquared,  Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'ReportedBMI', 'WeightError', 'BMIError', 'HeightError', 'AgeSquared', 'Experience', 'ExperienceSquared', 'CarAge'})];
+
+% creating a subset that satisfies criteria (ex: selecting males, white collar)
+ rows = strcmp(tbl.Gender, 'Male');
+ tbl = tbl(rows,:);
+ 
+%selecting variables for analysis
+   vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
+           'MaritalStatus', 'Race', 'NumberOfChildren', 'ReportedBMI', 'ReportedHeight'};
+  
+ tbl = tbl(:, vars);
+ 
+% find rows with missing data
+ TF = ismissing(tbl);
+ tbl(any(TF,2),:);
+ 
+% remove rows with missing data
+ tbl = rmmissing(tbl);
+ 
+% take log on family income
+ tbl.FamilyIncome = log(tbl.FamilyIncome);
+ 
+% fit a model
+ mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
+ 
+coeff_estimate = mdl.Coefficients.Estimate';
+
+% Bootstrap
+N = size(tbl.FamilyIncome,1);
+
+MAX_ITER = 1000;
+
+bootstrap_coeff = [];
+for i=1:MAX_ITER
+
+    idx = randi(height(tbl), N,1);
+
+    bootstrap_tbl = tbl(idx,:);
+    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
+    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
+        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
+    end
+end
+
+bootstrap_estimate = mean(bootstrap_coeff');
+bootstrap_SE = std(bootstrap_coeff');
+t_stat = coeff_estimate./bootstrap_SE;
+fprintf('Bootstrap\n');
+fprintf('============================================\n');
+fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
+for i=1:length(bootstrap_estimate)
+    str = mdl.CoefficientNames{i};
+    if length(str) > 20
+        str = [str(1:5), '...', str(end-10:end)];
+    end
+    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
+end
+
+
+%% Reported BMI vs Income (Female only) - Table 7
+% adding new variables
+BMI = caesar.Weight./(caesar.Stature*0.001).^2;
+ReportedBMI = caesar.ReportedWeight./(caesar.ReportedHeight*0.001).^2;
+AgeSquared = caesar.Age.^2;
+Exp = max(caesar.Age - caesar.Education - 6,0);
+ExpSquared = Exp.^2;
+CarAge = 2001-caesar.CarYear;
+WeightError = caesar.ReportedWeight - caesar.Weight;
+BMIError = ReportedBMI - BMI;
+HeightError = caesar.ReportedHeight - caesar.Stature;
+
+tbl = [caesar, array2table([BMI, ReportedBMI, WeightError, BMIError, HeightError, AgeSquared,  Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'ReportedBMI', 'WeightError', 'BMIError', 'HeightError', 'AgeSquared', 'Experience', 'ExperienceSquared', 'CarAge'})];
+
+% creating a subset that satisfies criteria (ex: selecting males, white collar)
+ rows = strcmp(tbl.Gender, 'Female');
+ tbl = tbl(rows,:);
+ 
+%selecting variables for analysis
+ vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
+           'MaritalStatus', 'Race', 'NumberOfChildren', 'ReportedBMI', 'ReportedHeight'};
+  
+ tbl = tbl(:, vars);
+ 
+% find rows with missing data
+ TF = ismissing(tbl);
+ tbl(any(TF,2),:);
+ 
+% remove rows with missing data
+ tbl = rmmissing(tbl);
+ 
+% take log on family income
+ tbl.FamilyIncome = log(tbl.FamilyIncome);
+ 
+% fit a model
+ mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
+
+coeff_estimate = mdl.Coefficients.Estimate';
+
+% Bootstrap
+N = size(tbl.FamilyIncome,1);
+
+MAX_ITER = 1000;
+
+bootstrap_coeff = [];
+for i=1:MAX_ITER
+
+    idx = randi(height(tbl), N,1);
+
+    bootstrap_tbl = tbl(idx,:);
+    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
+    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
+        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
+    end
+end
+
+bootstrap_estimate = mean(bootstrap_coeff');
+bootstrap_SE = std(bootstrap_coeff');
+t_stat = coeff_estimate./bootstrap_SE;
+fprintf('Bootstrap\n');
+fprintf('============================================\n');
+fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
+for i=1:length(bootstrap_estimate)
+    str = mdl.CoefficientNames{i};
+    if length(str) > 20
+        str = [str(1:5), '...', str(end-10:end)];
+    end
+    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
+end
+
+
+%% BMI vs Income (male only) - Tables 8 & 11 & 13
+% adding new variables
+BMI = caesar.Weight./(caesar.Stature*0.001).^2;
+AgeSquared = caesar.Age.^2;
+Exp = max(caesar.Age - caesar.Education - 6,0);
+ExpSquared = Exp.^2;
+CarAge = 2001-caesar.CarYear;
+tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'AgeSquared', 'Experience', 'ExperienceSquared', 'CarAge'})];
+
+% creating a subset that satisfies criteria (ex: selecting males, white collar)
+ rows = strcmp(tbl.Gender, 'Male');
+ tbl = tbl(rows,:);
+ 
+%selecting variables for analysis
+
+    vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
+         'NumberOfChildren', 'Fitness', 'CarModel',  'BirthState',  'Stature', 'BMI'};
+     
+  
+ tbl = tbl(:, vars);
+ 
+% find rows with missing data
+ TF = ismissing(tbl);
+ tbl(any(TF,2),:);
+ 
+% remove rows with missing data
+ tbl = rmmissing(tbl);
+ 
+% take log on family income
+ tbl.FamilyIncome = log(tbl.FamilyIncome);
+ 
+% fit a model
+ mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
+ 
+coeff_estimate = mdl.Coefficients.Estimate';
+
+% Bootstrap
+N = size(tbl.FamilyIncome,1);
+
+MAX_ITER = 1000;
+
+bootstrap_coeff = [];
+for i=1:MAX_ITER
+
+    idx = randi(height(tbl), N,1);
+
+    bootstrap_tbl = tbl(idx,:);
+    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
+    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
+        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
+    end
+end
+
+bootstrap_estimate = mean(bootstrap_coeff');
+bootstrap_SE = std(bootstrap_coeff');
+t_stat = coeff_estimate./bootstrap_SE;
+fprintf('Bootstrap\n');
+fprintf('============================================\n');
+fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
+for i=1:length(bootstrap_estimate)
+    str = mdl.CoefficientNames{i};
+    if length(str) > 20
+        str = [str(1:5), '...', str(end-10:end)];
+    end
+    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
+end
+
+
+ %% BMI vs Income (Female only) - Tables 8 & 11 & 13
+% adding new variables
+BMI = caesar.Weight./(caesar.Stature*0.001).^2;
+AgeSquared = caesar.Age.^2;
+Exp = max(caesar.Age - caesar.Education - 6,0);
+ExpSquared = Exp.^2;
+CarAge = 2001-caesar.CarYear;
+Hip2Waist = caesar.HipCircumference_Maximum./caesar.WaistCircumference_Pref.*100;
+tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, Hip2Waist], 'VariableNames', {'BMI', 'AgeSquared', 'Experience', 'ExperienceSquared', 'CarAge', 'Hip2Waist'})];
+
+% creating a subset that satisfies criteria (ex: selecting males, white collar)
+ rows = strcmp(tbl.Gender, 'Female');
+ tbl = tbl(rows,:);
+ 
+%selecting variables for analysis
+   vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
+           'MaritalStatus', 'Race', 'NumberOfChildren', 'Fitness',  'CarModel', 'BirthState', 'BMI', 'Stature', 'Hip2Waist'};
+ 
+ tbl = tbl(:, vars);
+ 
+% find rows with missing data
+ TF = ismissing(tbl);
+ tbl(any(TF,2),:);
+ 
+% remove rows with missing data
+ tbl = rmmissing(tbl);
+ 
+% take log on family income
+ tbl.FamilyIncome = log(tbl.FamilyIncome);
+ 
+% fit a model
+ mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
+
+coeff_estimate = mdl.Coefficients.Estimate';
+
+% Bootstrap
+N = size(tbl.FamilyIncome,1);
+
+MAX_ITER = 1000;
+
+bootstrap_coeff = [];
+for i=1:MAX_ITER
+    
+    idx = randi(height(tbl), N,1);
+
+    bootstrap_tbl = tbl(idx,:);
+    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
+    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
+        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
+    end
+end
+
+bootstrap_estimate = mean(bootstrap_coeff');
+bootstrap_SE = std(bootstrap_coeff');
+t_stat = coeff_estimate./bootstrap_SE;
+fprintf('Bootstrap\n');
+fprintf('============================================\n');
+fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
+for i=1:length(bootstrap_estimate)
+    str = mdl.CoefficientNames{i};
+    if length(str) > 20
+        str = [str(1:5), '...', str(end-10:end)];
+    end
+    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
+end
+
+
+%% Various body measures vs Income - Table 9
+% adding new variables
+BMI = caesar.Weight./(caesar.Stature*0.001).^2;
+AgeSquared = caesar.Age.^2;
+Exp = max(caesar.Age - caesar.Education - 6,0);
+ExpSquared = Exp.^2;
+CarAge = 2001-caesar.CarYear;
+
+tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge'})];
+
+% creating a subset that satisfies criteria (ex: selecting males, white collar)
+ gender = 'Male';
+ rows = strcmp(tbl.Gender, gender);
+ tbl = tbl(rows,:);
+ 
+% selecting variables for analysis
+vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
+         'MaritalStatus', 'Race', 'NumberOfChildren'};
+ 
+
+if strcmp(gender, 'Male') == 1
+    vars = cat(2, vars, caesar.Properties.VariableNames(setdiff(26:70,[36,28,29,61,62,63])));
+else
+    vars = cat(2, vars, caesar.Properties.VariableNames(setdiff(26:70,[28,29,61,62,63])));
+end
+tbl = tbl(:, vars);
+
+% find rows with missing data
+ TF = ismissing(tbl);
+ tbl(any(TF,2),:);
+ 
+% remove rows with missing data
+ tbl = rmmissing(tbl);
+ 
+% take log on family income
+ tbl.FamilyIncome = log(tbl.FamilyIncome);
+ 
+% fit a model
+ mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome') 
+
+coeff_estimate = mdl.Coefficients.Estimate';
+
+% Bootstrap
+N = size(tbl.FamilyIncome,1);
+
+MAX_ITER = 1000;
+
+bootstrap_coeff = [];
+for i=1:MAX_ITER
+
+    idx = randi(height(tbl), N,1);
+
+    bootstrap_tbl = tbl(idx,:);
+    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'FamilyIncome');
+    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
+        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
+    end
+end
+
+bootstrap_estimate = mean(bootstrap_coeff');
+bootstrap_SE = std(bootstrap_coeff');
+t_stat = coeff_estimate./bootstrap_SE;
+fprintf('Bootstrap\n');
+fprintf('============================================\n');
+fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
+for i=1:length(bootstrap_estimate)
+    str = mdl.CoefficientNames{i};
+    if length(str) > 20
+        str = [str(1:5), '...', str(end-10:end)];
+    end
+    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
+end
+
+%% P3 vs Various body measures - Table 10
+% adding new variables
+BMI = caesar.Weight./(caesar.Stature*0.001).^2;
+Hip2Waist = caesar.HipCircumference_Maximum./caesar.WaistCircumference_Pref.*100;
+tbl = [caesar, array2table([Hip2Waist], 'VariableNames', {'Hip2Waist'})];
+
+% creating a subset that satisfies criteria (ex: selecting males, white collar)
+gender = 'Female';
+rows = strcmp(tbl.Gender, gender);
+tbl = tbl(rows,:);
+ 
+% selecting variables for analysis
+vars = {'BraSize', 'CupSize', 'Var3'};
+vars = cat(2, vars, caesar.Properties.VariableNames(setdiff(26:70,[28,29,61,62,63])));
+
+tbl = tbl(:, vars);
+
+% find rows with missing data
+TF = ismissing(tbl);
+tbl(any(TF,2),:);
+ 
+% remove rows with missing data
+tbl = rmmissing(tbl);
+ 
+% fit a model
+mdl = fitlm(tbl, 'ResponseVar', 'Var3') 
+
+coeff_estimate = mdl.Coefficients.Estimate';
+
+% Bootstrap
+N = size(tbl.Var3,1);
+
+MAX_ITER = 1000;
+
+bootstrap_coeff = [];
+for i=1:MAX_ITER
+    %idx = randperm(height(tbl));
+    %idx(N+1:end)=[];
+    idx = randi(height(tbl), N,1);
+
+    bootstrap_tbl = tbl(idx,:);
+    bootstrap_mdl = fitlm(bootstrap_tbl, 'ResponseVar', 'Var3');
+    if mdl.NumCoefficients == length(bootstrap_mdl.Coefficients.Estimate)
+        bootstrap_coeff = [bootstrap_coeff, bootstrap_mdl.Coefficients.Estimate];
+    end
+end
+
+bootstrap_estimate = mean(bootstrap_coeff');
+bootstrap_SE = std(bootstrap_coeff');
+t_stat = coeff_estimate./bootstrap_SE;
+fprintf('Bootstrap\n');
+fprintf('============================================\n');
+fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
+for i=1:length(bootstrap_estimate)
+    str = mdl.CoefficientNames{i};
+    if length(str) > 20
+        str = [str(1:5), '...', str(end-10:end)];
+    end
+    fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
+end
+
+
+
+
+
+ %% Body types from deep learning vs Income (male only) - Tables 12 & 14
+% adding new variables
+BMI = caesar.Weight./(caesar.Stature*0.001).^2;
+AgeSquared = caesar.Age.^2;
 Exp = max(caesar.Age - caesar.Education - 6,0);
 ExpSquared = Exp.^2;
 CarAge = 2001-caesar.CarYear;
@@ -2228,23 +1756,12 @@ Interaction = caesar.Var1.*caesar.Var2;
 tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, Interaction], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge',  'Interaction'})];
 
 % creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- % rows = strcmp(tbl.Gender, 'Male')  & strcmp(tbl.Race, 'White');
- %rows = strcmp(tbl.Gender, 'Male')  & strcmp(tbl.MaritalStatus, 'Married');
   rows = strcmp(tbl.Gender, 'Male');
   tbl = tbl(rows,:);
  
 %selecting variables for analysis
-% vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%      'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'CarMake','CarModel', 'CarAge'...
-%       'Var1', 'Var2'};
- 
-
-    vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
+   vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
          'NumberOfChildren', 'Fitness', 'CarModel',  'BirthState',  'Var1', 'Var2'};
-
-%    vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
-%         'NumberOfChildren', 'Fitness',      'Var1', 'Var2'};
     
 %      vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'MaritalStatus', 'Race',  ...
 %          'NumberOfChildren', 'Var1', 'Var2'};
@@ -2275,8 +1792,7 @@ MAX_ITER = 1000;
 
 bootstrap_coeff = [];
 for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
+
     idx = randi(height(tbl), N,1);
 
     bootstrap_tbl = tbl(idx,:);
@@ -2302,11 +1818,10 @@ end
 
 
 
-  %% Body types from deep learning vs Income (Female only)
+  %% Body types from deep learning vs Income (Female only) - Tables 12 & 14
 % adding new variables
 BMI = caesar.Weight./(caesar.Stature*0.001).^2;
 AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
 Exp = max(caesar.Age - caesar.Education - 6,0);
 ExpSquared = Exp.^2;
 CarAge = 2001-caesar.CarYear;
@@ -2317,23 +1832,13 @@ SingleP3 = strcmp(caesar.MaritalStatus, 'Single').*caesar.Var3;
 tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, Interaction, SingleP3], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge',  'Interaction', 'SingleP3'})];
 
 % creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
-rows = strcmp(tbl.Gender, 'Female') ; %& strcmp(tbl.MaritalStatus, 'Single') & tbl.Age>22 ;
-% rows = strcmp(tbl.Gender, 'Female')  & strcmp(tbl.MaritalStatus, 'Single');
-% rows = strcmp(tbl.Gender, 'Female') & tbl.Age>=20 & tbl.Age<40;
- tbl = tbl(rows,:);
+
+rows = strcmp(tbl.Gender, 'Female') ; 
+tbl = tbl(rows,:);
  
 %selecting variables for analysis
-%   vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
- %      'Fitness',  'Race', 'BirthState', 'Site', 'CarMake','CarModel', 'CarAge',...
-  %     'Var1', 'Var2', 'Var3'};
-
-
-%     vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', ...
-%            'MaritalStatus',  'Race',  'BirthState', 'Site',   'Fitness',  'CarModel', 'CarAge',  'Var1', 'Var2', 'Var3'};
-
    vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
-        'NumberOfChildren', 'Fitness', 'CarModel',  'BirthState',   'Var1', 'Var2', 'Var3'};%, 'SingleP3'};
+        'NumberOfChildren', 'Fitness', 'CarModel',  'BirthState',   'Var1', 'Var2', 'Var3'};
 
 %    vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
 %         'NumberOfChildren', 'Var1', 'Var2', 'Var3'};
@@ -2363,8 +1868,7 @@ MAX_ITER = 1000;
 
 bootstrap_coeff = [];
 for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
+
     idx = randi(height(tbl), N,1);
 
     bootstrap_tbl = tbl(idx,:);
@@ -2388,7 +1892,7 @@ for i=1:length(bootstrap_estimate)
     fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate(i), bootstrap_SE(i), t_stat(i));
 end
 
-%% IV: Body types from deep learning vs Income (Male only)
+%% IV: Body types from deep learning vs Income (Male only) - Tables 15 & 16
 
 % Shoe Size Lookup
 us2mm = containers.Map(...
@@ -2439,7 +1943,6 @@ us2mm = containers.Map(...
 % adding new variables
 BMI = caesar.Weight./(caesar.Stature*0.001).^2;
 AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
 Exp = max(caesar.Age - caesar.Education - 6,0);
 ExpSquared = Exp.^2;
 CarAge = 2001-caesar.CarYear;
@@ -2465,9 +1968,6 @@ tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, HeightErro
 
 
 % creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- % rows = strcmp(tbl.Gender, 'Male')  & strcmp(tbl.Race, 'White');
- %rows = strcmp(tbl.Gender, 'Male')  & strcmp(tbl.MaritalStatus, 'Married');
   rows = strcmp(tbl.Gender, 'Male');
   tbl = tbl(rows,:);
   
@@ -2481,16 +1981,7 @@ pantres_model = fitlm(tbl.WaistCircumference_Pref, tbl.PantsSizeWaist);
 tbl.PantResidual = pantres_model.Residuals.Raw;
 
 %selecting variables for analysis
-% vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%      'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'CarMake','CarModel', 'CarAge'...
-%       'Var1', 'Var2'};
- 
-
-%    vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
-%         'NumberOfChildren', 'Fitness', 'CarModel', 'CarAge', 'BirthState', 'Site',   'Var1', 'Var2'};
-
-%    vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
-%         'NumberOfChildren', 'Fitness',      'Var1', 'Var2'};
+%use Stature and BMI in place of Var1 and Var2 for Table 15
     
      vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
           'Fitness', 'CarModel', 'BirthState', 'Site', 'ShoeResidual', 'JacketResidual', 'PantResidual', 'Var1', 'Var2'};
@@ -2522,8 +2013,7 @@ MAX_ITER = 1000;
 
 bootstrap_coeff_v1 = [];
 for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
+
     idx = randi(height(tbl_v1), N,1);
 
     bootstrap_tbl_v1 = tbl_v1(idx,:);
@@ -2549,60 +2039,9 @@ end
 
 
 % define control function for Var1
-%Var1_hat = caesar.Var2 - mdl_v1.Residuals(:,1); %fitted Var1
 CF1 = mdl_v1.Residuals(:,1);
 
 
-
-% vars = { 'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
-%           'Fitness', 'CarModel', 'BirthState',  'ShoeResidual', 'JacketResidual', 'PantResidual', 'Var2'};
-% tbl_v2 = tbl(:, vars);
-% 
-% % fit a model: 1st stage for Var2
-%  mdl_v2 = fitlm(tbl_v2, 'ResponseVar', 'Var2')
-% 
-%  coeff_estimate_v2 = mdl_v2.Coefficients.Estimate';
-%  
-%  % Bootstrap
-% N = size(tbl_v2.Var2,1);
-% 
-% MAX_ITER = 1000;
-% 
-% bootstrap_coeff_v2 = [];
-% for i=1:MAX_ITER
-%     %idx = randperm(height(tbl));
-%     %idx(N+1:end)=[];
-%     idx = randi(height(tbl_v2), N,1);
-% 
-%     bootstrap_tbl_v2 = tbl_v2(idx,:);
-%     bootstrap_mdl_v2 = fitlm(bootstrap_tbl_v2, 'ResponseVar', 'Var2');
-%     if mdl_v2.NumCoefficients == length(bootstrap_mdl_v2.Coefficients.Estimate)
-%         bootstrap_coeff_v2 = [bootstrap_coeff_v2, bootstrap_mdl_v2.Coefficients.Estimate];
-%     end
-% end
-% 
-% bootstrap_estimate_v2 = mean(bootstrap_coeff_v2');
-% bootstrap_SE_v2 = std(bootstrap_coeff_v2');
-% t_stat_v2 = coeff_estimate_v2./bootstrap_SE_v2;
-% fprintf('Bootstrap\n');
-% fprintf('============================================\n');
-% fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
-% for i=1:length(bootstrap_estimate_v2)
-%     str = mdl_v2.CoefficientNames{i};
-%     if length(str) > 20
-%         str = [str(1:5), '...', str(end-10:end)];
-%     end
-%     fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate_v2(i), bootstrap_SE_v2(i), t_stat_v2(i));
-% end
-% 
-% 
-% % define control function for Var2
-% %Var2_hat = caesar.Var2 - mdl_v2.Residuals(:,1);  %fitted Var2
-% CF2 = mdl_v2.Residuals(:,1);
-
-
-
- 
 % take log on family income
  tbl.FamilyIncome = log(tbl.FamilyIncome);
  
@@ -2613,9 +2052,6 @@ CF1 = mdl_v1.Residuals(:,1);
      
  tbl2 = [tbl2, CF1];
  tbl2.Properties.VariableNames{'Raw'} = 'ControlFunction1';
- 
-%  tbl2 = [tbl2, CF2];
-%  tbl2.Properties.VariableNames{'Raw'} = 'ControlFunction2';
  
  % fit a model: 2nd stage
  mdl2 = fitlm(tbl2, 'ResponseVar', 'FamilyIncome')
@@ -2629,8 +2065,7 @@ MAX_ITER = 1000;
 
 bootstrap_coeff2 = [];
 for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
+
     idx = randi(height(tbl2), N,1);
 
     bootstrap_tbl2 = tbl2(idx,:);
@@ -2656,7 +2091,7 @@ end
 
 
 
- %% IV: Body types from deep learning vs Income (Female only)
+ %% IV: Body types from deep learning vs Income (Female only) - Tables 15 & 16
  
 % Shoe Size Lookup
 us2mm = containers.Map(...
@@ -2707,7 +2142,6 @@ us2mm = containers.Map(...
 % adding new variables
 BMI = caesar.Weight./(caesar.Stature*0.001).^2;
 AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
 Exp = max(caesar.Age - caesar.Education - 6,0);
 ExpSquared = Exp.^2;
 CarAge = 2001-caesar.CarYear;
@@ -2732,10 +2166,7 @@ tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, HeightErro
 
 
 % creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- % rows = strcmp(tbl.Gender, 'Male')  & strcmp(tbl.Race, 'White');
- %rows = strcmp(tbl.Gender, 'Male')  & strcmp(tbl.MaritalStatus, 'Married');
-  rows = strcmp(tbl.Gender, 'Female');%  & strcmp(tbl.MaritalStatus, 'Single');
+  rows = strcmp(tbl.Gender, 'Female');
   tbl = tbl(rows,:);
  
 shoeres_model = fitlm(tbl.FootLength, tbl.ShoeSize);
@@ -2748,26 +2179,11 @@ pantres_model = fitlm(tbl.WaistCircumference_Pref, tbl.PantsSizeWoman);
 tbl.PantResidual = pantres_model.Residuals.Raw;
 
 %selecting variables for analysis
-% vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%      'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'CarMake','CarModel', 'CarAge'...
-%       'Var1', 'Var2'};
- 
-
-%    vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
-%         'NumberOfChildren', 'Fitness', 'CarModel', 'CarAge', 'BirthState', 'Site',   'Var1', 'Var2'};
-
-%    vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
-%         'NumberOfChildren', 'Fitness',      'Var1', 'Var2'};
-    
-%      vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'MaritalStatus', 'Race',  ...
-%              'Fitness', 'CarModel', 'BirthState',  'ShoeResidual', 'BlouResidual', 'PantResidual', 'Stature', 'BMI', 'Hip2Waist'};
-
+%use Stature, BMI, and Hip2Waist in place of Var1, Var2, and Var3 for Table 15
      vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'MaritalStatus', 'Race',  ...
-             'Fitness', 'CarModel', 'BirthState',  'ShoeResidual', 'BlouResidual', 'PantResidual', 'Var1', 'Var2', 'Var3'};
+              'Fitness', 'CarModel', 'BirthState',  'ShoeResidual', 'BlouResidual', 'PantResidual', 'Var1', 'Var2', 'Var3'};
 
          
-
-
  tbl = tbl(:, vars);
  
 % find rows with missing data
@@ -2778,7 +2194,7 @@ tbl.PantResidual = pantres_model.Residuals.Raw;
  tbl = rmmissing(tbl);
 
 vars = {'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'MaritalStatus', 'Race',  ...
-             'Fitness', 'CarModel', 'BirthState',    'ShoeResidual', 'BlouResidual', 'PantResidual', 'Var1'};
+          'Fitness', 'CarModel', 'BirthState',    'ShoeResidual', 'BlouResidual', 'PantResidual', 'Var1'};
 tbl_v1 = tbl(:, vars);
 
 % fit a model: 1st stage for Var1
@@ -2793,8 +2209,7 @@ MAX_ITER = 1000;
 
 bootstrap_coeff_v1 = [];
 for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
+
     idx = randi(height(tbl_v1), N,1);
 
     bootstrap_tbl_v1 = tbl_v1(idx,:);
@@ -2820,73 +2235,19 @@ end
 
 
 % define control function for Var1
-%Var1_hat = caesar.Var2 - mdl_v1.Residuals(:,1); %fitted Var1
 CF1 = mdl_v1.Residuals(:,1);
-
-
-
-% vars = {'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'MaritalStatus', 'Race',  ...
-%              'Fitness', 'CarModel', 'BirthState', 'ShoeResidual', 'BlouResidual', 'PantResidual',  'Var2'};
-% tbl_v2 = tbl(:, vars);
-% 
-% % fit a model: 1st stage for Var2
-%  mdl_v2 = fitlm(tbl_v2, 'ResponseVar', 'Var2')
-% 
-%  coeff_estimate_v2 = mdl_v2.Coefficients.Estimate';
-%  
-%  % Bootstrap
-% N = size(tbl_v2.Var2,1);
-% 
-% MAX_ITER = 1000;
-% 
-% bootstrap_coeff_v2 = [];
-% for i=1:MAX_ITER
-%     %idx = randperm(height(tbl));
-%     %idx(N+1:end)=[];
-%     idx = randi(height(tbl_v2), N,1);
-% 
-%     bootstrap_tbl_v2 = tbl_v2(idx,:);
-%     bootstrap_mdl_v2 = fitlm(bootstrap_tbl_v2, 'ResponseVar', 'Var2');
-%     if mdl_v2.NumCoefficients == length(bootstrap_mdl_v2.Coefficients.Estimate)
-%         bootstrap_coeff_v2 = [bootstrap_coeff_v2, bootstrap_mdl_v2.Coefficients.Estimate];
-%     end
-% end
-% 
-% bootstrap_estimate_v2 = mean(bootstrap_coeff_v2');
-% bootstrap_SE_v2 = std(bootstrap_coeff_v2');
-% t_stat_v2 = coeff_estimate_v2./bootstrap_SE_v2;
-% fprintf('Bootstrap\n');
-% fprintf('============================================\n');
-% fprintf('%20s\tEstimate\tStd\tt-Stat\n', 'Variable');
-% for i=1:length(bootstrap_estimate_v2)
-%     str = mdl_v2.CoefficientNames{i};
-%     if length(str) > 20
-%         str = [str(1:5), '...', str(end-10:end)];
-%     end
-%     fprintf('%20s\t%f\t%f\t%f\n', str, coeff_estimate_v2(i), bootstrap_SE_v2(i), t_stat_v2(i));
-% end
-% 
-% 
-% % define control function for Var2
-% %Var2_hat = caesar.Var2 - mdl_v2.Residuals(:,1);  %fitted Var2
-% CF2 = mdl_v2.Residuals(:,1);
-
-
 
  
 % take log on family income
  tbl.FamilyIncome = log(tbl.FamilyIncome);
  
  vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
-          'Fitness', 'CarModel', 'BirthState',  'Var1', 'Var2', 'Var3'};
+         'Fitness', 'CarModel', 'BirthState',  'Var1', 'Var2', 'Var3'};
 
      tbl2 = tbl(:, vars);
      
  tbl2 = [tbl2, CF1];
  tbl2.Properties.VariableNames{'Raw'} = 'ControlFunction1';
- 
-%  tbl2 = [tbl2, CF2];
-%  tbl2.Properties.VariableNames{'Raw'} = 'ControlFunction2';
  
  % fit a model: 2nd stage
  mdl2 = fitlm(tbl2, 'ResponseVar', 'FamilyIncome')
@@ -2900,8 +2261,7 @@ MAX_ITER = 1000;
 
 bootstrap_coeff2 = [];
 for i=1:MAX_ITER
-    %idx = randperm(height(tbl));
-    %idx(N+1:end)=[];
+
     idx = randi(height(tbl2), N,1);
 
     bootstrap_tbl2 = tbl2(idx,:);
@@ -2927,238 +2287,3 @@ end
 
 
 
-
-
-%% Family Income and Education (Male Only)
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-
-
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
-rows = strcmp(tbl.Gender, 'Male');
-tbl = tbl(rows,:);
- 
-% % selecting variables for analysis
-
-vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-      'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'BMI', 'Stature', 'Var1', 'Var2'};
-  
-tbl = tbl(:, vars);
- 
-% find rows with missing data
-TF = ismissing(tbl);
-tbl(any(TF,2),:);
- 
-% remove rows with missing data
-tbl = rmmissing(tbl);
- 
-% take log on family income
-tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% EDUCATION = b1*Height + b2*BMI + e
-mdl = fitlm(tbl, 'ResponseVar', 'Education', 'PredictorVars', {'Stature', 'BMI'})
-% EDUCATION = b1*P1 + b2*P2 + e
-mdl = fitlm(tbl, 'ResponseVar', 'Education', 'PredictorVars', {'Var1', 'Var2'})
-% Family Income = b*Edu + Controls + e
-mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome', 'PredictorVars', ...
-     {'Education', 'Experience', 'ExperienceSquared', 'Occupation', 'NumberOfChildren',...
-      'Fitness', 'MaritalStatus', 'Race', 'BirthState'})
-  
-
-close all
-figure('pos',[10 10 900 500]);
-marker_size = 5;
-marker_color = 'k+';
-poly_degree = 1;
-
-x = tbl.Stature; y = tbl.Education; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,2); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('Height vs. Education ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('Height (mm)','Interpreter','latex'); ylabel('Education','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-x = tbl.BMI; y = tbl.Education; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,3); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('BMI vs. Education ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('BMI','Interpreter','latex'); ylabel('Education','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-
-x = tbl.Var1; y = tbl.Education; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,2); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_1$ vs. Education ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_1$','Interpreter','latex'); ylabel('Education','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-x = tbl.Var2; y = tbl.Education; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,3); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_2$ vs. Education ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_2$','Interpreter','latex'); ylabel('Education','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-
-x = tbl.Education; y = tbl.FamilyIncome; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,1); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('Education vs. Family Income ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('Education','Interpreter','latex'); ylabel('Family Income','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-
- 
-%% Family Income and Education (Female Only)
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-
-
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
-rows = strcmp(tbl.Gender, 'Female');
-tbl = tbl(rows,:);
- 
-% % selecting variables for analysis
-
-vars = {'FamilyIncome', 'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-      'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'BMI', 'Stature', 'Var1', 'Var2', 'Var3'};
-  
-tbl = tbl(:, vars);
- 
-% find rows with missing data
-TF = ismissing(tbl);
-tbl(any(TF,2),:);
- 
-% remove rows with missing data
-tbl = rmmissing(tbl);
- 
-% take log on family income
-tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% EDUCATION = b1*Height + b2*BMI + e
-mdl = fitlm(tbl, 'ResponseVar', 'Education', 'PredictorVars', {'Stature', 'BMI'})
-% EDUCATION = b1*P1 + b2*P2 + b3*P3 + e
-mdl = fitlm(tbl, 'ResponseVar', 'Education', 'PredictorVars', {'Var1', 'Var2', 'Var3'})
-% Family Income = b*Edu + Controls + e
-mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome', 'PredictorVars', ...
-     {'Education', 'Experience', 'ExperienceSquared', 'Occupation', 'NumberOfChildren',...
-      'Fitness', 'MaritalStatus', 'Race', 'BirthState'})
-
- 
-
-%% BMI Explained by Family Income
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-
-
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
-rows = strcmp(tbl.Gender, 'Female')   & tbl.Age >30;
-tbl = tbl(rows,:);
- 
-% % selecting variables for analysis
-
-vars = {'FamilyIncome', 'Age', 'AgeSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-      'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'BMI', 'Stature', 'Var1', 'Var2', 'Var3'};
-  
-tbl = tbl(:, vars);
- 
-% find rows with missing data
-TF = ismissing(tbl);
-tbl(any(TF,2),:);
- 
-% remove rows with missing data
-tbl = rmmissing(tbl);
- 
-% take log on family income
-tbl.FamilyIncome = log(tbl.FamilyIncome);
-
-
-% Obesity = b*FamilyIncome + Control + e
-mdl = fitlm(tbl, 'ResponseVar', 'Var2', 'PredictorVars', ...
-     {'FamilyIncome', 'Education', 'Age', 'AgeSquared', 'Occupation', 'NumberOfChildren',...
-      'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'Var1', 'Var3'})
-
-  %% Singles (Male only)
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-Interaction = caesar.Var1.*caesar.Var2;
-
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, Interaction], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge',  'Interaction'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.MaritalStatus, 'Single') & tbl.Age > 30;
- tbl = tbl(rows,:);
- 
-%selecting variables for analysis
-%   vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%       'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'CarMake','CarModel', 'CarAge'...
-%        'Var1', 'Var2'};
- 
-
-  vars = {'FamilyIncome',   'Experience', 'ExperienceSquared', 'Occupation', 'Education',...
-      'Fitness', 'Race', 'BirthState', 'Var1', 'Var2'};
-
-
-
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
- 
-% take log on family income
- tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
- mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
-
- 
-  %% Singles (Female only)
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-AgeSquared = caesar.Age.^2;
-%Exp = caesar.Age - caesar.Education - 6;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-Interaction = caesar.Var1.*caesar.Var2;
-
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, Interaction], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge',  'Interaction'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- %rows = strcmp(tbl.Gender, 'Male') & strcmp(tbl.Occupation, 'White Collar');
- rows = strcmp(tbl.Gender, 'Female') & strcmp(tbl.MaritalStatus, 'Single') & tbl.Age > 30;
- tbl = tbl(rows,:);
- 
-%selecting variables for analysis
-%   vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-%       'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'CarMake','CarModel', 'CarAge'...
-%        'Var1', 'Var2'};
- 
-
-  vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',...
-      'Fitness', 'Race', 'BirthState', 'Var1', 'Var2', 'Var3'};
-
-
-
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
- 
-% take log on family income
- tbl.FamilyIncome = log(tbl.FamilyIncome);
- 
-% fit a model
- mdl = fitlm(tbl, 'ResponseVar', 'FamilyIncome')
- 
