@@ -1984,7 +1984,7 @@ tbl.PantResidual = pantres_model.Residuals.Raw;
 %use Stature and BMI in place of Var1 and Var2 for Table 15
     
      vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
-          'NumberOfChildren', 'Fitness', 'CarModel', 'BirthState', 'Site', 'ShoeResidual', 'JacketResidual', 'PantResidual', 'Var1', 'Var2'};
+          'Fitness', 'CarModel', 'BirthState', 'Site', 'ShoeResidual', 'JacketResidual', 'PantResidual', 'Var1', 'Var2'};
 
 
  tbl = tbl(:, vars);
@@ -1998,7 +1998,7 @@ tbl.PantResidual = pantres_model.Residuals.Raw;
 
  
 vars = {'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
-         'NumberOfChildren', 'Fitness', 'CarModel', 'BirthState','Site',  'ShoeResidual', 'JacketResidual', 'PantResidual', 'Var1'};
+          'Fitness', 'CarModel', 'BirthState','Site',  'ShoeResidual', 'JacketResidual', 'PantResidual', 'Var1'};
 tbl_v1 = tbl(:, vars);
 
 % fit a model: 1st stage for Var1
@@ -2046,7 +2046,7 @@ CF1 = mdl_v1.Residuals(:,1);
  tbl.FamilyIncome = log(tbl.FamilyIncome);
  
  vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'MaritalStatus', 'Race',  ...
-          'NumberOfChildren', 'Fitness', 'CarModel', 'BirthState',  'Site', 'Var1',   'Var2'};
+          'Fitness', 'CarModel', 'BirthState',  'Site', 'Var1',   'Var2'};
 
      tbl2 = tbl(:, vars);
      
@@ -2181,7 +2181,7 @@ tbl.PantResidual = pantres_model.Residuals.Raw;
 %selecting variables for analysis
 %use Stature, BMI, and Hip2Waist in place of Var1, Var2, and Var3 for Table 15
      vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'MaritalStatus', 'Race',  ...
-             'NumberOfChildren', 'Fitness', 'CarModel', 'BirthState',  'ShoeResidual', 'BlouResidual', 'PantResidual', 'Var1', 'Var2', 'Var3'};
+              'Fitness', 'CarModel', 'BirthState',  'ShoeResidual', 'BlouResidual', 'PantResidual', 'Var1', 'Var2', 'Var3'};
 
          
  tbl = tbl(:, vars);
@@ -2194,7 +2194,7 @@ tbl.PantResidual = pantres_model.Residuals.Raw;
  tbl = rmmissing(tbl);
 
 vars = {'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'MaritalStatus', 'Race',  ...
-         'NumberOfChildren', 'Fitness', 'CarModel', 'BirthState',    'ShoeResidual', 'BlouResidual', 'PantResidual', 'Var1'};
+          'Fitness', 'CarModel', 'BirthState',    'ShoeResidual', 'BlouResidual', 'PantResidual', 'Var1'};
 tbl_v1 = tbl(:, vars);
 
 % fit a model: 1st stage for Var1
@@ -2242,7 +2242,7 @@ CF1 = mdl_v1.Residuals(:,1);
  tbl.FamilyIncome = log(tbl.FamilyIncome);
  
  vars = {'FamilyIncome',  'Experience', 'ExperienceSquared', 'Occupation', 'Education',  'MaritalStatus',  'Race', ...
-         'NumberOfChildren', 'Fitness', 'CarModel', 'BirthState',  'Var1', 'Var2', 'Var3'};
+         'Fitness', 'CarModel', 'BirthState',  'Var1', 'Var2', 'Var3'};
 
      tbl2 = tbl(:, vars);
      
