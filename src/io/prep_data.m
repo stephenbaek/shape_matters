@@ -30,5 +30,10 @@ function caesar = prep_data(DATA_PATH)
     caesar = reformat_jacket_size(caesar);
     caesar = reformat_pants_size(caesar);
     caesar = reformat_bra_size(caesar);
+    
+    % Reordering rows... This was necessary to set the reference group for
+    % dummy variables
+    caesar.BirthState = reordercats(categorical(caesar.BirthState),{'Midwest', 'Foreign',  'Northeast', 'South', 'West'}); % changing reference group for BirthState to Midwest
+    caesar.CarModel = reordercats(categorical(caesar.CarModel),{'Non-sedan', 'Sedan',});
     fprintf('DONE (%.4f seconds)\n', toc)
 end

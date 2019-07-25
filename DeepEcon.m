@@ -7,13 +7,6 @@ DATA_PATH = 'data';
 
 addpath('src/io');
 caesar = prep_data(DATA_PATH);
-
-
-%%
-caesar.BirthState = reordercats(categorical(caesar.BirthState),{'Midwest', 'Foreign',  'Northeast', 'South', 'West'}); % changing reference group for BirthState to Midwest
-caesar.CarMake = reordercats(categorical(caesar.CarMake),{'Economy', 'Luxury'}); % changing reference group for car make to Economy
-caesar.CarModel = reordercats(categorical(caesar.CarModel),{'Non-sedan', 'Sedan',});
-
 summary(caesar)
 
 
@@ -1059,11 +1052,10 @@ BMI = caesar.Weight./(caesar.Stature*0.001).^2;
 AgeSquared = caesar.Age.^2;
 Exp = max(caesar.Age - caesar.Education - 6,0);
 ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
 HeightError = caesar.ReportedHeight - caesar.Stature;
 WeightError = caesar.ReportedWeight - caesar.Weight;
 
-tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, CarAge, HeightError, WeightError], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'CarAge', 'HeightError', 'WeightError'})];
+tbl = [caesar, array2table([BMI, AgeSquared, Exp, ExpSquared, HeightError, WeightError], 'VariableNames', {'BMI', 'AgeSquared','Experience', 'ExperienceSquared', 'HeightError', 'WeightError'})];
 
 % creating a subset that satisfies criteria (ex: selecting males, white collar)
  rows = strcmp(tbl.Gender, 'Male');
