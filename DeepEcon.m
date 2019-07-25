@@ -3,13 +3,13 @@ clear all
 close all
 clc
 
+DATA_PATH = 'data';
 
-getd = @(p)path(p, path);
-getd('src');
-clear getd
+addpath('src/io');
+caesar = prep_data(DATA_PATH);
 
-prep_data();
 
+%%
 caesar.BirthState = reordercats(categorical(caesar.BirthState),{'Midwest', 'Foreign',  'Northeast', 'South', 'West'}); % changing reference group for BirthState to Midwest
 caesar.CarMake = reordercats(categorical(caesar.CarMake),{'Economy', 'Luxury'}); % changing reference group for car make to Economy
 caesar.CarModel = reordercats(categorical(caesar.CarModel),{'Non-sedan', 'Sedan',});
