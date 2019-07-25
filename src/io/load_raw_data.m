@@ -1,6 +1,6 @@
 function caesar = load_raw_data(data_path)
     % Read the excel sheets
-    % TODO: Warning: Variable names were modified to make them valid MATLAB identifiers. The original names are saved in the VariableDescriptions property.
+    warning('off', 'MATLAB:table:ModifiedAndSavedVarnames');
     fprintf('Reading demographics data...'); tic
     demographics = readtable(fullfile(data_path, 'Demographics.xls'));
     fprintf('DONE (%.4f seconds)\n', toc)

@@ -6,8 +6,6 @@ DATA_PATH = '../../Data';
 
 caesar = load_raw_data(DATA_PATH);
 
-
-fprintf('Reformatting table...'); tic
 % Beautify column names
 for i=1:length(caesar.Properties.VariableNames)
     caesar.Properties.VariableNames(i) = strrep(caesar.Properties.VariableNames(i), '_mm_', '');
@@ -23,6 +21,7 @@ caesar = movevars(caesar, 'Age_years', 'After', 'Gender');
 caesar.Properties.VariableNames{3} = 'Age';
 
 % Reformat columns
+tic
 caesar = reformat_family_income(caesar); % range string --> integer value
 caesar = reformat_birth_state(caesar);   % individual state name --> midwest, ...
 caesar = reformat_occupation(caesar);
@@ -35,5 +34,9 @@ caesar = reformat_car_model(caesar);
 caesar = reformat_shoe_size(caesar);
 caesar = reformat_jacket_size(caesar);
 caesar = reformat_pants_size(caesar);
-caesar = reformat_bra_size(caesar);
-fprintf('DONE (%.4f seconds)\n', toc)
+caesar = reformat
+toc
+
+
+
+%% reformat bra size (TODO: split the cup size?)
