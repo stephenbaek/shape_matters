@@ -6,118 +6,53 @@ clc
 DATA_PATH = 'data';
 
 addpath('src/io');
+addpath('src/plot');
 caesar = prep_data(DATA_PATH);
 summary(caesar)
 
-
 %% Summary statistics (male only) - Table 1
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-ReportedBMI = caesar.ReportedWeight./(caesar.ReportedHeight*0.001).^2;
-AgeSquared = caesar.Age.^2;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-WeightError = caesar.ReportedWeight - caesar.Weight;
-BMIError = ReportedBMI - BMI;
-HeightError = caesar.ReportedHeight - caesar.Stature;
-
-
-tbl = [caesar, array2table([BMI, ReportedBMI, WeightError, BMIError, HeightError, AgeSquared,  Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'ReportedBMI', 'WeightError', 'BMIError', 'HeightError', 'AgeSquared', 'Experience', 'ExperienceSquared', 'CarAge'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- rows = strcmp(tbl.Gender, 'Male');
- tbl = tbl(rows,:);
+% Select male
+rows = strcmp(caesar.Gender, 'Male');
+tbl = caesar(rows,:);
  
 %selecting variables for analysis
-   vars = {'FamilyIncome', 'ReportedHeight', 'ReportedWeight',  'Stature', 'Weight', 'BMI', 'ReportedBMI', 'WeightError', 'BMIError', 'HeightError' ...
-           'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-           'Fitness', 'MaritalStatus', 'Race', 'BirthState',  'Var1', 'Var2' };
- 
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
+vars = {'FamilyIncome',...
+    'ReportedHeight', 'ReportedWeight', 'ReportedBMI',...
+    'Stature', 'Weight', 'BMI', ...
+    'WeightError', 'BMIError', 'HeightError', ...
+    'Experience', 'ExperienceSquared', 'Occupation', 'Education',...
+    'NumberOfChildren', 'Fitness', 'MaritalStatus', 'Race', 'BirthState',...
+    'Var1', 'Var2' }; 
+tbl = tbl(:, vars);
 
-summary(tbl)
+% find and remove rows with missing data
+TF = ismissing(tbl);
+tbl(any(TF,2),:);
+tbl = rmmissing(tbl);
 
-close all
-figure('pos',[10 10 900 500]);
-marker_size = 5;
-marker_color = 'k+';
-poly_degree = 1;
-
-x = tbl.Var1; y = tbl.Stature; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,2); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_1$ vs. Height ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_1$','Interpreter','latex'); ylabel('Height (mm)','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-x = tbl.Var1; y = tbl.Weight; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,3); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_1$ vs. Weight ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_1$','Interpreter','latex'); ylabel('Weight (kg)','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-x = tbl.Var1; y = tbl.BMI; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,1); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_1$ vs. BMI ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_1$','Interpreter','latex'); ylabel('BMI','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-
-x = tbl.Var2; y = tbl.Stature; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,5); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_2$ vs. Height ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_2$','Interpreter','latex'); ylabel('Height (mm)','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-x = tbl.Var2; y = tbl.Weight; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,6); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_2$ vs. Weight ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_2$','Interpreter','latex'); ylabel('Weight (kg)','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-x = tbl.Var2; y = tbl.BMI; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,4); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_2$ vs. BMI ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_2$','Interpreter','latex'); ylabel('BMI','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-
+plot_conventional_vs_deep(tbl);
 %% Summary statistics (Female only) - Table 2
-% adding new variables
-BMI = caesar.Weight./(caesar.Stature*0.001).^2;
-ReportedBMI = caesar.ReportedWeight./(caesar.ReportedHeight*0.001).^2;
-AgeSquared = caesar.Age.^2;
-Exp = max(caesar.Age - caesar.Education - 6,0);
-ExpSquared = Exp.^2;
-CarAge = 2001-caesar.CarYear;
-WeightError = caesar.ReportedWeight - caesar.Weight;
-BMIError = ReportedBMI - BMI;
-HeightError = caesar.ReportedHeight - caesar.Stature;
+% Select Female
+rows = strcmp(caesar.Gender, 'Female');
+tbl = caesar(rows,:);
 
-tbl = [caesar, array2table([BMI, ReportedBMI, WeightError, BMIError, HeightError, AgeSquared,  Exp, ExpSquared, CarAge], 'VariableNames', {'BMI', 'ReportedBMI', 'WeightError', 'BMIError', 'HeightError', 'AgeSquared', 'Experience', 'ExperienceSquared', 'CarAge'})];
-
-% creating a subset that satisfies criteria (ex: selecting males, white collar)
- rows = strcmp(tbl.Gender, 'Female');
- tbl = tbl(rows,:);
-
-   vars = {'FamilyIncome', 'ReportedHeight', 'ReportedWeight',  'Stature', 'Weight', 'BMI', 'ReportedBMI', 'WeightError', 'BMIError', 'HeightError' ...
-           'Experience', 'ExperienceSquared', 'Occupation', 'Education', 'NumberOfChildren',...
-           'Fitness', 'MaritalStatus', 'Race', 'BirthState', 'Var1', 'Var2', 'Var3', 'HipCircumference_Maximum', 'WaistCircumference_Pref', 'CupSize', 'BraSize' };
+vars = {'FamilyIncome',...
+    'ReportedHeight', 'ReportedWeight', 'ReportedBMI',...
+    'Stature', 'Weight', 'BMI', ...
+    'HeightError', 'WeightError', 'BMIError', ...
+    'Experience', 'ExperienceSquared', 'Occupation', 'Education',...
+    'NumberOfChildren', 'Fitness', 'MaritalStatus', 'Race', 'BirthState',...
+    'Var1', 'Var2', 'Var3',...
+    'HipCircumference_Maximum', 'WaistCircumference_Pref',...
+    'CupSize', 'BraSize'}; % TODO: Hip, Waist, Cup, Bra???
+tbl = tbl(:, vars);
  
- tbl = tbl(:, vars);
- 
-% find rows with missing data
- TF = ismissing(tbl);
- tbl(any(TF,2),:);
- 
-% remove rows with missing data
- tbl = rmmissing(tbl);
+% find and remove rows with missing data
+TF = ismissing(tbl);
+tbl(any(TF,2),:);
+tbl = rmmissing(tbl);
 
-summary(tbl)
-
-close all
-figure('pos',[10 10 900 500]);
-marker_size = 5;
-marker_color = 'k+';
-poly_degree = 1;
-
-x = tbl.Var1; y = tbl.Stature; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,2); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_1$ vs. Height ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_1$','Interpreter','latex'); ylabel('Height (mm)','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-x = tbl.Var1; y = tbl.Weight; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,3); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_1$ vs. Weight ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_1$','Interpreter','latex'); ylabel('Weight (kg)','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-x = tbl.Var1; y = tbl.BMI; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,1); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_1$ vs. BMI ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_1$','Interpreter','latex'); ylabel('BMI','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-
-x = tbl.Var2; y = tbl.Stature; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,5); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_2$ vs. Height ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_2$','Interpreter','latex'); ylabel('Height (mm)','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-x = tbl.Var2; y = tbl.Weight; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,6); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_2$ vs. Weight ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_2$','Interpreter','latex'); ylabel('Weight (kg)','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-x = tbl.Var2; y = tbl.BMI; p = polyfit(x, y, poly_degree); f = polyval(p, x); rsq = 1 - sum((y - f).^2)/sum((y - mean(y)).^2); pf = polyval(p, -3:0.1:3);
-subplot(2,3,4); scatter(x, y, marker_size, marker_color); set(gca,'TickLabelInterpreter','latex'); title(sprintf('$P_2$ vs. BMI ($R^2=%f$)',rsq),'Interpreter','latex'); xlabel('$P_2$','Interpreter','latex'); ylabel('BMI','Interpreter','latex'); axis([-3,3,-Inf,Inf]); hold on; plot(-3:0.1:3, pf, 'linewidth', 2, 'color', [1,0.5,0]);
-
+plot_conventional_vs_deep(tbl);
 %% Nayadara-Watson kernel-regression (height, male only) - Figure 4
 tbl = caesar;
 

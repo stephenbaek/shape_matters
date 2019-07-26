@@ -35,5 +35,18 @@ function caesar = prep_data(DATA_PATH)
     % dummy variables
     caesar.BirthState = reordercats(categorical(caesar.BirthState),{'Midwest', 'Foreign',  'Northeast', 'South', 'West'}); % changing reference group for BirthState to Midwest
     caesar.CarModel = reordercats(categorical(caesar.CarModel),{'Non-sedan', 'Sedan',});
+    
+    % Additional variables
+    BMI = caesar.Weight./(caesar.Stature*0.001).^2;
+    ReportedBMI = caesar.ReportedWeight./(caesar.ReportedHeight*0.001).^2;
+    AgeSquared = caesar.Age.^2;
+    Exp = max(caesar.Age - caesar.Education - 6,0);
+    ExpSquared = Exp.^2;
+    WeightError = caesar.ReportedWeight - caesar.Weight;
+    BMIError = ReportedBMI - BMI;
+    HeightError = caesar.ReportedHeight - caesar.Stature;
+
+    caesar = [caesar, array2table([BMI, ReportedBMI, WeightError, BMIError, HeightError, AgeSquared,  Exp, ExpSquared], 'VariableNames', {'BMI', 'ReportedBMI', 'WeightError', 'BMIError', 'HeightError', 'AgeSquared', 'Experience', 'ExperienceSquared'})];
+
     fprintf('DONE (%.4f seconds)\n', toc)
 end
